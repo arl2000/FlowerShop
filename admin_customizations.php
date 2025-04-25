@@ -1,5 +1,6 @@
 <?php
 session_start();
+include 'navbar.php';
 include 'db_connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -33,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $price = $_POST['ribbon_price'];
         if (isset($_POST['edit_id'])) {
             $id = $_POST['edit_id'];
-            mysqli_query($conn, "UPDATE ribbon_colors SET color='$color', price='$price' WHERE id=$id");
+            mysqli_query($conn, "UPDATE ribbon_colors SET name='$color', price='$price' WHERE id=$id");
         } else {
-            mysqli_query($conn, "INSERT INTO ribbon_colors (color, price) VALUES ('$color', '$price')");
+            mysqli_query($conn, "INSERT INTO ribbon_colors (name, price) VALUES ('$color', '$price')");
         }
     }
 
@@ -72,31 +73,110 @@ if (isset($_GET['delete_customized'])) {
 <head>
     <title>Admin Customizations</title>
     <style>
-        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
-        h2 { margin-top: 30px; }
-        form, .item-list { margin-bottom: 20px; background: #fff; padding: 20px; border-radius: 8px; }
-        input[type=text], input[type=number] { padding: 8px; margin-right: 10px; width: 200px; }
-        button { padding: 8px 15px; background: green; color: white; border: none; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-        a { margin: 0 5px; color: #007BFF; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .delete-btn {
-            background: #dc3545;
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #fff6f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #d15e97;
+            margin-top: 30px;
+        }
+
+        form, .item-list {
+            margin-bottom: 20px;
+            background: #ffe8ec;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        input[type=text], input[type=number] {
+            padding: 10px;
+            margin-right: 10px;
+            width: 200px;
+            border: 1px solid #fcdde6;
+            border-radius: 6px;
+            background-color: white;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #d15e97;
             color: white;
             border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            transition: background 0.3s ease;
         }
+
+        button:hover {
+            background-color: #bb407c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            border: 1px solid #fcdde6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ffe8ec;
+            color: #d15e97;
+        }
+
+        a {
+            margin: 0 5px;
+            color: #d15e97;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #bb407c;
+            text-decoration: underline;
+        }
+
+        .delete-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
         .delete-btn:hover {
-            background: #c82333;
+            background-color: #e63c3c;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btns button {
+            padding: 6px 12px;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
 
-<h1>Admin Customizations Panel</h1>
+<h1>Add Side Items</h1>
 
 <!-- ADD-ONS -->
 <h2>Add-ons</h2>
@@ -184,32 +264,6 @@ if (isset($_GET['delete_customized'])) {
     }
     ?>
 </table>
-
-<!-- CUSTOMIZED PRODUCTS -->
-<h2>Customized Products</h2>
-<table>
-    <tr><th>Product Name</th><th>Price</th><th>Actions</th></tr>
-    <?php
-    $result = mysqli_query($conn, "SELECT * FROM customized_products WHERE is_deleted = 0");
-    while ($row = mysqli_fetch_assoc($result)) {
-        echo "<tr>
-            <td>{$row['product_name']}</td>
-            <td>₱{$row['product_price']}</td>
-            <td>
-                <button class='delete-btn' onclick='deleteCustomizedProduct({$row['id']})'>Delete</button>
-            </td>
-        </tr>";
-    }
-    ?>
-</table>
-
-<script>
-function deleteCustomizedProduct(productId) {
-    if (confirm('Are you sure you want to delete this product?')) {
-        window.location.href = `admin_customizations.php?delete_customized=1&id=${productId}`;
-    }
-}
-</script>
 
 </body>
 </html>

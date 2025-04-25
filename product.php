@@ -176,6 +176,12 @@ $products_result = mysqli_query($conn, "
             background-color: #3c99e6;
         }
 
+        .add-items-btn{
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
         @media (max-width: 600px) {
             .add-product-btn, .inventory-link {
                 width: 90%;
@@ -210,13 +216,20 @@ $products_result = mysqli_query($conn, "
 </head>
 <body>
 
-<a href="add_product.php" class="add-product-btn">
-    <i class="fas fa-plus-circle"></i> ADD PRODUCTS
-</a>
+    <div class="add-items-btn">
 
-<a href="admin_customized_products.php" class="add-product-btn">
-    <i class="fas fa-plus-circle"></i> VIEW CUSTOMIZED PRODUCTS
-</a>
+        <a href="add_product.php" class="add-product-btn">
+            <i class="fas fa-plus-circle"></i> ADD PRODUCTS
+        </a>
+
+        <a href="admin_customized_products.php" class="add-product-btn">
+            <i class="fas fa-plus-circle"></i> VIEW CUSTOMIZED PRODUCTS
+        </a>
+
+        <a href="admin_customizations.php" class="add-product-btn">
+            <i class="fas fa-plus-circle"></i> ADD SIDE ITEMS
+        </a>
+    </div>
 
 <h2><i class="fas fa-seedling"></i> Product List</h2>
 

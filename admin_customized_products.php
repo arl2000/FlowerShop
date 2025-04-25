@@ -239,7 +239,7 @@ if (isset($_GET['delete_id'])) {
 </head>
 <body>
 
-<a href="add_customized_product.php" class="add-product-btn">
+<a href="add_bouquet.php" class="add-product-btn">
     <i class="fas fa-plus-circle"></i> ADD CUSTOMIZED PRODUCT
 </a>
 
