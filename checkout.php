@@ -67,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
     $stmt->close();
 
-    $_SESSION['checkout_message'] = "Order placed successfully!";
-    header("Location: order_confirmation.php?order_id=$orderId");
+    $_SESSION['checkout_message'] = "Thank you for your order! Your order has been placed successfully.";
+    header("Location: orders.php");
     exit();
 }
 ?>

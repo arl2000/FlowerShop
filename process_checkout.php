@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $userId = $_SESSION['user_id'];
 
     // Fetch cart items from the database
-    $stmt = $conn->prepare("SELECT product_id, product_name, product_price, quantity FROM cart WHERE user_id = ?");
+    $stmt = $conn->prepare("SELECT product_id, product_name, product_price, quantity, is_customized FROM cart WHERE user_id = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -69,6 +69,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $product_name = $item['product_name'];
             $price_per_item = $item['product_price'];
             $quantity = $item['quantity'];
+            $is_customized = $item['is_customized'] ?? 0;
+
+            // If it's a customized product, first insert it into products table
+            if ($is_customized) {
+                $insert_product = $conn->prepare("INSERT INTO products (product_name, price, product_price, product_description, product_image) VALUES (?, ?, ?, ?, ?)");
+                $default_desc = "Customized product";
+                $default_image = "default.jpg";
+                $insert_product->bind_param("sddss", $product_name, $price_per_item, $price_per_item, $default_desc, $default_image);
+                $insert_product->execute();
+                $product_id = $conn->insert_id;
+                $insert_product->close();
+            }
 
             $stmt_items->bind_param("iisdi", $order_id, $product_id, $product_name, $price_per_item, $quantity);
             $stmt_items->execute();
@@ -81,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $clear_cart->execute();
         $clear_cart->close();
 
-        echo "<script>alert('Order placed successfully! Waiting for admin approval.'); window.location.href='thank_you.php';</script>";
+        echo "<script>alert('Order placed successfully! Waiting for admin approval.'); window.location.href='trackorders.php';</script>";
     } else {
         echo "Error creating order: " . $stmt_orders->error;
     }

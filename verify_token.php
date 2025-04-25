@@ -64,42 +64,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #333;
         }
 
         .header-text {
-            padding: 50px 0;
+            width: 100%;
+            padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 0 15px;
         }
 
         .sign-in {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            backdrop-filter: blur(10px);
         }
 
         .signin-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
+            gap: 40px;
         }
 
         .signin-image {
             flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .signin-image img {
             max-width: 100%;
             height: auto;
             object-fit: contain;
+            border-radius: 10px;
         }
 
         .signin-form {
@@ -108,82 +118,108 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .form-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #333;
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-weight: 600;
+            text-align: center;
         }
 
         .token-inputs {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             justify-content: center;
-            margin: 20px 0;
+            margin: 30px 0;
         }
 
         .token-inputs input {
-            width: 50px;
-            height: 60px;
+            width: 60px;
+            height: 70px;
             text-align: center;
-            font-size: 28px;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            background-color: #fff;
-            color: #333;
-            line-height: 1.2;
+            font-size: 32px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            transition: all 0.3s ease;
         }
 
         .token-inputs input:focus {
             outline: none;
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .form-button {
             text-align: center;
+            margin-top: 30px;
         }
 
         .form-submit {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
             color: white;
-            padding: 12px 24px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
         }
 
         .form-submit:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
 
         .signup-image-link {
             display: block;
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
             color: #666;
             text-decoration: none;
+            transition: color 0.3s ease;
         }
 
         .signup-image-link:hover {
-            color: #333;
+            color: #3498db;
         }
 
         .token-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .token-group label {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-size: 16px;
             font-weight: 500;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .signin-content {
+                flex-direction: column;
+            }
+            
+            .token-inputs input {
+                width: 50px;
+                height: 60px;
+                font-size: 28px;
+            }
+            
+            .sign-in {
+                padding: 30px;
+            }
         }
     </style>
 </head>
