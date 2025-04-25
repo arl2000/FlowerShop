@@ -2,41 +2,69 @@
 include 'db_connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST['name']);
+    $username = trim($_POST['username']);
+    $name = trim($_POST['name']);
     $email = trim($_POST['email']);
-    $password = password_hash($_POST['pass'], PASSWORD_DEFAULT);
-
-    // Step 1: Check if username exists
-    $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-    if (!$stmt) {
-        die("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+    $address = trim($_POST['address']);
+    $phone = trim($_POST['phone']);
+    $password = $_POST['pass'];
+    $repassword = $_POST['re_pass'];
+    
+    // Phone number validation
+    if(!preg_match('/^09\d{9}$/', $phone)) {
+        $error = "Phone number must be 11 digits and start with 09.";
     }
-
-    $stmt->bind_param("ss", $username, $email);
-    $stmt->execute();
-    $stmt->store_result();
-
-    if ($stmt->num_rows > 0) {
-        $error = "Username or email already exists!";
-    } else {
-        // Step 2: Insert new user
-        $insert_stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
-        if (!$insert_stmt) {
-            die("Insert prepare failed: (" . $conn->errno . ") " . $conn->error);
+    // Password validation
+    else {
+        $uppercase = preg_match('/[A-Z]/', $password);
+        $lowercase = preg_match('/[a-z]/', $password);
+        $special_char = preg_match('/[^A-Za-z0-9]/', $password);
+        
+        // Password requirements check
+        if(!$uppercase || !$lowercase || !$special_char) {
+            $error = "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 special character.";
         }
-
-        $insert_stmt->bind_param("sss", $username, $email, $password);
-        if ($insert_stmt->execute()) {
-            header("Location: user_login.php?success=registered");
-            exit();
-        } else {
-            $error = "Error: " . $insert_stmt->error;
+        // Confirm passwords match
+        else if($password != $repassword) {
+            $error = "Passwords do not match.";
         }
+        else {
+            // Hash password only if it passes validation
+            $password = password_hash($password, PASSWORD_DEFAULT);
+            
+            // Step 1: Check if username exists
+            $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+            if (!$stmt) {
+                die("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+            }
 
-        $insert_stmt->close();
+            $stmt->bind_param("ss", $username, $email);
+            $stmt->execute();
+            $stmt->store_result();
+
+            if ($stmt->num_rows > 0) {
+                $error = "Username or email already exists!";
+            } else {
+                // Step 2: Insert new user
+                $insert_stmt = $conn->prepare("INSERT INTO users (username, name, email, password, address, phone) VALUES (?, ?, ?, ?, ?, ?)");
+                if (!$insert_stmt) {
+                    die("Insert prepare failed: (" . $conn->errno . ") " . $conn->error);
+                }
+
+                $insert_stmt->bind_param("ssssss", $username, $name, $email, $password, $address, $phone);
+                if ($insert_stmt->execute()) {
+                    header("Location: user_login.php?success=registered");
+                    exit();
+                } else {
+                    $error = "Error: " . $insert_stmt->error;
+                }
+
+                $insert_stmt->close();
+            }
+
+            $stmt->close();
+        }
     }
-
-    $stmt->close();
 }
 ?>
 <!DOCTYPE html>
@@ -78,16 +106,29 @@ https://templatemo.com/tm-535-softy-pinko
                             <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
                             <form method="POST" class="register-form" id="register-form">
                                 <div class="form-group">
-                                    <label type="text" name="username" required><i class="zmdi zmdi-account material-icons-name"></i></label>
-                                    <input type="text" name="name" id="name" placeholder="Username"/>
+                                    <label for="username"><i class="zmdi zmdi-account material-icons-name"></i></label>
+                                    <input type="text" name="username" id="username" placeholder="Username"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="name"><i class="zmdi zmdi-account material-icons-name"></i></label>
+                                    <input type="text" name="name" id="name" placeholder="Your Name"/>
                                 </div>
                                 <div class="form-group">
                                     <label for="email"><i class="zmdi zmdi-email"></i></label>
                                     <input type="email" name="email" id="email" placeholder="Email"/>
                                 </div>
                                 <div class="form-group">
+                                    <label for="address"><i class="zmdi zmdi-pin"></i></label>
+                                    <input type="text" name="address" id="address" placeholder="Address"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone"><i class="zmdi zmdi-phone"></i></label>
+                                    <input type="text" name="phone" id="phone" placeholder="Phone (11 digits starting with 09)"/>
+                                </div>
+                                <div class="form-group">
                                     <label type="password" name="password"><i class="zmdi zmdi-lock"></i></label>
                                     <input type="password" name="pass" id="pass" placeholder="Password"/>
+                                    <small id="passwordHelp" class="form-text text-muted">Must contain at least 1 uppercase letter, 1 lowercase letter, and 1 special character.</small>
                                 </div>
                                 <div class="form-group">
                                     <label for="re-pass"><i class="zmdi zmdi-lock-outline"></i></label>
@@ -126,6 +167,39 @@ https://templatemo.com/tm-535-softy-pinko
     
     <!-- Global Init -->
     <script src="assets/js/custom.js"></script>
+    
+    <!-- Password validation script -->
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            const password = document.getElementById('pass').value;
+            const rePass = document.getElementById('re_pass').value;
+            const phone = document.getElementById('phone').value;
+            
+            // Validate phone number
+            const phoneRegex = /^09\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                event.preventDefault();
+                alert('Phone number must be 11 digits and start with 09');
+                return false;
+            }
+            
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+            
+            if (!hasUpperCase || !hasLowerCase || !hasSpecialChar) {
+                event.preventDefault();
+                alert('Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 special character');
+                return false;
+            }
+            
+            if (password !== rePass) {
+                event.preventDefault();
+                alert('Passwords do not match');
+                return false;
+            }
+        });
+    </script>
 
   </body>
 </html>

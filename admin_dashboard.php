@@ -89,6 +89,52 @@ $top_address_query = $conn->query("
     LIMIT 1
 ");
 $top_address = $top_address_query->fetch_assoc();
+
+// --- New Queries for Detailed Reports ---
+
+// Total Sales Revenue
+$total_revenue_query = $conn->query("SELECT SUM(total_amount) AS total_revenue FROM orders");
+$total_revenue_data = $total_revenue_query->fetch_assoc();
+$total_revenue = $total_revenue_data['total_revenue'] ?? 0; // Default to 0 if null
+
+// Top 5 Selling Products (for bar chart list)
+$top_products_query = $conn->query("
+    SELECT p.product_name, SUM(oi.quantity) AS total_quantity 
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.product_id
+    GROUP BY p.product_id, p.product_name
+    ORDER BY total_quantity DESC 
+    LIMIT 5
+");
+$top_products_report = [];
+$max_quantity = 0;
+while ($row = $top_products_query->fetch_assoc()) {
+    $top_products_report[] = $row;
+    if ($row['total_quantity'] > $max_quantity) {
+        $max_quantity = $row['total_quantity'];
+    }
+}
+// Calculate width percentage for bars
+foreach ($top_products_report as &$product) {
+    $product['width_percent'] = ($max_quantity > 0) ? ($product['total_quantity'] / $max_quantity) * 100 : 0;
+}
+unset($product); // Unset reference
+
+// Top 3 Selling Products (for donut chart)
+$donut_data_query = $conn->query("
+    SELECT p.product_name, SUM(oi.quantity) AS total_quantity 
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.product_id
+    GROUP BY p.product_id, p.product_name
+    ORDER BY total_quantity DESC 
+    LIMIT 3
+");
+$donut_data = [];
+while ($row = $donut_data_query->fetch_assoc()) {
+    $donut_data[] = $row;
+}
+// --- End New Queries ---
+
 ?>
 
 <!DOCTYPE html>
@@ -276,6 +322,170 @@ $top_address = $top_address_query->fetch_assoc();
             border-color: #8e44ad;
             box-shadow: 0 0 0 2px rgba(142, 68, 173, 0.1);
         }
+
+        // --- New Styles for Detailed Reports ---
+        .detailed-report-card {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: 0.8fr 1fr 1fr; /* Adjust column ratios as needed */
+            gap: 2rem;
+            align-items: start;
+            position: relative;
+        }
+
+        .report-nav-arrows {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .report-nav-arrows button {
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            padding: 0.3rem 0.6rem;
+            cursor: pointer;
+            color: #555;
+            transition: background-color 0.2s;
+        }
+
+        .report-nav-arrows button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .report-text-section h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-total-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #5a3b8a; /* Purple color */
+            margin-bottom: 0.2rem;
+        }
+
+        .report-subtitle {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #5a3b8a; /* Purple color */
+            margin-bottom: 1rem;
+        }
+
+        .report-description {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .report-bar-chart-section h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .report-bar-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .report-bar-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .report-bar-item-label {
+            width: 100px; /* Adjust as needed */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 1rem;
+        }
+
+        .report-bar-container {
+            flex-grow: 1;
+            height: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-right: 1rem;
+        }
+
+        .report-bar {
+            height: 100%;
+            border-radius: 5px;
+            background-color: #5a3b8a; /* Default bar color */
+            transition: width 0.5s ease-in-out;
+        }
+        /* Assign specific colors to bars */
+        .report-bar-item:nth-child(1) .report-bar { background-color: #5a3b8a; } /* Dark Purple */
+        .report-bar-item:nth-child(2) .report-bar { background-color: #f39c12; } /* Yellow */
+        .report-bar-item:nth-child(3) .report-bar { background-color: #e74c3c; } /* Red */
+        .report-bar-item:nth-child(4) .report-bar { background-color: #3498db; } /* Blue */
+        .report-bar-item:nth-child(5) .report-bar { background-color: #8e44ad; } /* Lighter Purple */
+
+        .report-bar-value {
+            min-width: 30px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .report-donut-chart-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .report-donut-container {
+            width: 180px; /* Adjust size as needed */
+            height: 180px;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        #detailedReportDonutChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .report-donut-legend {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            align-items: flex-start;
+        }
+
+        .report-legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .report-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        // --- End New Styles ---
+
     </style>
 </head>
 <body>
@@ -408,6 +618,58 @@ $top_address = $top_address_query->fetch_assoc();
             </div>
         </div>
     </div>
+
+    <!-- Detailed Reports Section -->
+    <div class="detailed-report-card">
+        <div class="report-nav-arrows">
+            <button>&lt;</button>
+            <button>&gt;</button>
+        </div>
+
+        <!-- Left Text Section -->
+        <div class="report-text-section">
+            <h2>Detailed Reports</h2>
+            <div class="report-total-value">₱<?= number_format($total_revenue, 2) ?></div>
+            <div class="report-subtitle">Sales Overview</div>
+            <p class="report-description">
+                The total sales revenue within the recorded period. Below is a breakdown by top products.
+            </p>
+        </div>
+
+        <!-- Middle Bar Chart Section -->
+        <div class="report-bar-chart-section">
+            <!-- <h3>Top Selling Products</h3> -->
+            <ul class="report-bar-list">
+                <?php if (!empty($top_products_report)): ?>
+                    <?php foreach ($top_products_report as $product): ?>
+                        <li class="report-bar-item">
+                            <span class="report-bar-item-label" title="<?= htmlspecialchars($product['product_name']) ?>">
+                                <?= htmlspecialchars($product['product_name']) ?>
+                            </span>
+                            <div class="report-bar-container">
+                                <div class="report-bar" style="width: <?= $product['width_percent'] ?>%;"></div>
+                            </div>
+                            <span class="report-bar-value"><?= $product['total_quantity'] ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No product sales data available.</p>
+                <?php endif; ?>
+            </ul>
+        </div>
+
+        <!-- Right Donut Chart Section -->
+        <div class="report-donut-chart-section">
+            <div class="report-donut-container">
+                <canvas id="detailedReportDonutChart"></canvas>
+            </div>
+            <ul class="report-donut-legend" id="detailedReportDonutLegend">
+                <!-- Legend items will be generated by JavaScript -->
+            </ul>
+        </div>
+    </div>
+    <!-- End Detailed Reports Section -->
+
 </div>
 
 <script>
@@ -571,7 +833,74 @@ $top_address = $top_address_query->fetch_assoc();
     });
 
     // Initialize charts when the page loads
-    document.addEventListener('DOMContentLoaded', initializeCharts);
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeCharts();
+
+        // --- Initialize Detailed Report Donut Chart ---
+        const donutData = <?= json_encode($donut_data) ?>;
+        const donutLabels = donutData.map(item => item.product_name);
+        const donutQuantities = donutData.map(item => item.total_quantity);
+        const donutColors = ['#5a3b8a', '#f39c12', '#3498db']; // Purple, Yellow, Blue
+
+        const donutCtx = document.getElementById('detailedReportDonutChart');
+        const legendContainer = document.getElementById('detailedReportDonutLegend');
+
+        if (donutCtx && legendContainer && donutQuantities.length > 0) {
+            new Chart(donutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: donutLabels,
+                    datasets: [{
+                        label: 'Top Product Sales',
+                        data: donutQuantities,
+                        backgroundColor: donutColors,
+                        borderColor: '#ffffff', // White border between segments
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%', // Adjust for donut thickness
+                    plugins: {
+                        legend: {
+                            display: false // Disable default legend, we use custom
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Generate custom legend
+            legendContainer.innerHTML = ''; // Clear previous legend items
+            donutLabels.forEach((label, index) => {
+                const li = document.createElement('li');
+                li.classList.add('report-legend-item');
+                li.innerHTML = `
+                    <span class="report-legend-color" style="background-color: ${donutColors[index % donutColors.length]}"></span>
+                    <span>${label} (${donutQuantities[index]})</span>
+                `;
+                legendContainer.appendChild(li);
+            });
+        } else if (legendContainer) {
+             legendContainer.innerHTML = '<li>No data for chart</li>';
+        }
+        // --- End Detailed Report Donut Chart Initialization ---
+    });
 </script>
 </body>
 </html>

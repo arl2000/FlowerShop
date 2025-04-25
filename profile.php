@@ -15,8 +15,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST["phone"];
 
     // Validate phone number format
-    if (!preg_match("/^\+63\d{9}$/", $phone)) {
-        $error = "Phone number must start with +63 and be exactly 11 digits.";
+    if (!preg_match("/^09\d{9}$/", $phone)) {
+        $error = "Phone number must start with 09 and be exactly 11 digits.";
     } else {
         // Update user info in the database
         if (!empty($_FILES["profile_image"]["name"])) {

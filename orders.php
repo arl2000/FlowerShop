@@ -2,6 +2,115 @@
 include 'db_connection.php';
 include 'navbar.php';
 
+// Import PHPMailer classes
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+// Function to send email notification when order status changes
+function sendStatusUpdateEmail($email, $order_id, $status) {
+    // Require PHPMailer autoload file if not already included
+    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        require 'vendor/autoload.php';
+    }
+    
+    // Create a new PHPMailer instance
+    $mail = new PHPMailer(true);
+    
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com'; // Using Gmail SMTP
+        $mail->SMTPAuth = true;
+        $mail->Username = 'grixia400@gmail.com'; // Replace with your email
+        $mail->Password = 'fwpx upvb sjbv weve'; // Replace with your app password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+        
+        // Enable verbose debug output (temporarily for troubleshooting)
+        $mail->SMTPDebug = 0; // Set to 0 for production, 2 for debugging
+        $mail->Debugoutput = 'html';
+        
+        // Recipients
+        $mail->setFrom('grixia400@gmail.com', 'Heavenly Bloom');
+        $mail->addAddress($email);
+        $mail->addReplyTo('grixia400@gmail.com', 'Heavenly Bloom');
+        
+        // Content
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+        
+        // Set appropriate subject and message based on status
+        switch($status) {
+            case 'approved':
+                $subject = 'Your Order #' . $order_id . ' Has Been Approved';
+                $message = 'Good news! Your order has been approved and is now being designed by our florists.';
+                break;
+            case 'shipped':
+                $subject = 'Your Order #' . $order_id . ' Has Been Shipped';
+                $message = 'Your order has been shipped and is on its way to our delivery partners.';
+                break;
+            case 'in_route':
+                $subject = 'Your Order #' . $order_id . ' Is On Its Way';
+                $message = 'Your order is now with our delivery partners and is on its way to you.';
+                break;
+            case 'delivered':
+                $subject = 'Your Order #' . $order_id . ' Has Been Delivered';
+                $message = 'Your order has been delivered. Thank you for shopping with Heavenly Bloom!';
+                break;
+            case 'pending':
+                $subject = 'Your Order #' . $order_id . ' Has Been Received';
+                $message = 'Thank you for your order! We have received your order and it is pending approval.';
+                break;
+            default:
+                $subject = 'Update on Your Order #' . $order_id;
+                $message = 'There has been an update to your order status to: ' . ucfirst($status);
+        }
+        
+        $mail->Subject = $subject;
+        $mail->Body = '
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; }
+                .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+                .header { background-color: #d15e97; color: white; padding: 15px; text-align: center; }
+                .content { padding: 20px; background-color: #fff9fc; }
+                .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #777; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>Order Status Update</h2>
+                </div>
+                <div class="content">
+                    <p>Dear Customer,</p>
+                    <p>' . $message . '</p>
+                    <p>Order ID: #' . $order_id . '</p>
+                    <p>Current Status: ' . ucfirst($status) . '</p>
+                    <p>If you have any questions about your order, please contact our customer service.</p>
+                    <p>Thank you for choosing Heavenly Bloom!</p>
+                </div>
+                <div class="footer">
+                    <p>© ' . date('Y') . ' Heavenly Bloom. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>';
+        
+        // Plain text version for non-HTML mail clients
+        $mail->AltBody = "Order Status Update\n\nDear Customer,\n\n$message\n\nOrder ID: #$order_id\nCurrent Status: " . ucfirst($status) . "\n\nThank you for choosing Heavenly Bloom!";
+        
+        $mail->send();
+        error_log("Email sent successfully to $email for order #$order_id with status $status");
+        return true;
+    } catch (Exception $e) {
+        error_log("Failed to send email to $email for order #$order_id: " . $mail->ErrorInfo);
+        return false;
+    }
+}
+
 $update_message = ''; // Variable to store update feedback
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -48,6 +157,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 WHERE order_id='$order_id'";
 
         if (mysqli_query($conn, $sql)) {
+            // Get customer email to send notification
+            $customer_query = "SELECT customer_email FROM orders WHERE order_id='$order_id'";
+            $customer_result = mysqli_query($conn, $customer_query);
+            $customer_data = mysqli_fetch_assoc($customer_result);
+            
+            // Send email notification about status update
+            if ($customer_data && !empty($customer_data['customer_email'])) {
+                $email_sent = sendStatusUpdateEmail($customer_data['customer_email'], $order_id, $order_status);
+                if ($email_sent) {
+                    $update_message .= "<p style='color: green;'>Email notification sent to customer.</p>";
+                } else {
+                    $update_message .= "<p style='color: orange;'>Order updated but email notification failed to send.</p>";
+                }
+            }
+
             // Deduct stock if order status is completed and we have sufficient stock
             if ($order_status === 'completed' && !$insufficient_stock) {
                 $items_query = "SELECT product_id, quantity FROM order_items WHERE order_id = '$order_id'";
@@ -107,7 +231,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                        (customer_name, customer_address, customer_email, customer_phone, order_message, proof_of_payment, order_status, product_id, quantity, total_amount, product_name, price, payment_method)
                        VALUES
                        ('$name', '$address', '$email', '$phone', '$message', '$proof', '$status', '$product_id', '$quantity', '$total_amount', '$product_name', '$price', '$payment_method')";
-        mysqli_query($conn, $sql_insert);
+        
+        if (mysqli_query($conn, $sql_insert)) {
+            $new_order_id = mysqli_insert_id($conn);
+            // Send email notification for new order
+            if (!empty($email)) {
+                $email_sent = sendStatusUpdateEmail($email, $new_order_id, $status);
+                if ($email_sent) {
+                    $update_message = "<p style='color: green;'>Order created and email notification sent to customer.</p>";
+                } else {
+                    $update_message = "<p style='color: orange;'>Order created but email notification failed to send.</p>";
+                }
+            } else {
+                $update_message = "<p style='color: green;'>Order created successfully!</p>";
+            }
+        } else {
+            $update_message = "<p style='color: red;'>Error creating order: " . mysqli_error($conn) . "</p>";
+        }
     }
 }
 ?>
@@ -244,11 +384,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     echo "<td>
                             <select class='status-select' name='order_status'>
                                 <option value='pending'" . ($order['order_status'] == 'pending' ? ' selected' : '') . ">Pending</option>
-                                <option value='processing'" . ($order['order_status'] == 'processing' ? ' selected' : '') . ">Processing</option>
                                 <option value='approved'" . ($order['order_status'] == 'approved' ? ' selected' : '') . ">Approved</option>
-                                <option value='declined'" . ($order['order_status'] == 'declined' ? ' selected' : '') . ">Declined</option>
+                                <option value='shipped'" . ($order['order_status'] == 'shipped' ? ' selected' : '') . ">shipped</option>
+                                <option value='in_route'" . ($order['order_status'] == 'in_route' ? ' selected' : '') . ">in_route</option>
                                 <option value='cancelled'" . ($order['order_status'] == 'cancelled' ? ' selected' : '') . ">Cancelled</option>
-                                <option value='completed'" . ($order['order_status'] == 'completed' ? ' selected' : '') . ">Completed</option>
+                                <option value='delivered'" . ($order['order_status'] == 'delivered' ? ' selected' : '') . ">delivered</option>
                             </select>
                         </td>";
                     echo "<td><input type='date' name='expected_delivery_date' value='" . $order['expected_delivery_date'] . "'></td>";

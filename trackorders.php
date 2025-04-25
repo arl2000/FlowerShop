@@ -74,37 +74,91 @@ foreach ($orders as $order) {
 
         .order-status-bar {
             display: flex;
-            justify-content: space-around;
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 6px;
-        }
-
-        .status-item {
-            flex: 1;
-            text-align: center;
-            padding: 8px;
-            border-radius: 4px;
-            color: #888;
-            font-size: 0.8em;
+            justify-content: space-between;
+            margin: 30px 0;
             position: relative;
         }
 
-        .status-item:not(:last-child)::after {
-            content: "";
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 1px;
-            height: 1.2em;
-            background-color: #eee;
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            width: 60px;
         }
 
-        .status-item.active {
+        .status-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #d8d8d8;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .status-circle.active {
             background-color: #d15e97;
+        }
+
+        .status-line {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #d8d8d8;
+            z-index: 1;
+        }
+
+        .status-line-progress {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            height: 2px;
+            background-color: #d15e97;
+            z-index: 1;
+        }
+
+        .status-text {
+            font-size: 0.8em;
+            text-align: center;
+            color: #888;
+            max-width: 80px;
+        }
+
+        .status-text.active {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .status-icon {
             color: white;
+            font-size: 12px;
+        }
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .order-number {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .order-expected {
+            text-align: right;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .order-product {
+            color: #888;
+            font-size: 0.8em;
         }
 
         .order-details {
@@ -161,24 +215,61 @@ foreach ($orders as $order) {
         <?php else: ?>
             <?php foreach ($order_details as $order_detail): ?>
                 <div class="order-container <?= ($order_detail['order']['order_status'] == 'declined') ? 'declined-order' : '' ?>" data-order-id="<?= htmlspecialchars($order_detail['order']['order_id']) ?>">
-                    <div class="order-header">
-                        <div>Order ID: <?= htmlspecialchars($order_detail['order']['order_id']) ?></div>
-                        <div>Date: <?= date("F j, Y", strtotime($order_detail['order']['order_date'])) ?></div>
-                        <div>Total: ₱<?= number_format($order_detail['order']['total_amount'], 2) ?></div>
+                    <div class="order-info">
+                        <div>
+                            <div class="order-number">ORDER #<?= htmlspecialchars($order_detail['order']['order_id']) ?></div>
+                            <div class="order-product">
+                                <?php if (!empty($order_detail['items']) && count($order_detail['items']) > 0): ?>
+                                    <?= htmlspecialchars($order_detail['items'][0]['product_name']) ?>
+                                    <?php if (count($order_detail['items']) > 1): ?>
+                                        and <?= count($order_detail['items']) - 1 ?> more item(s)
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="order-expected">
+                            <div>Expected Arrival <?= date("m/d/y", strtotime("+7 days", strtotime($order_detail['order']['order_date']))) ?></div>
+                        </div>
                     </div>
 
+                    <?php
+                        // Define the order status sequence
+                        $statuses = ['pending', 'approved', 'shipped', 'in_route', 'delivered'];
+                        $statusLabels = ['Order Processed', 'Order Designing', 'Order Shipped', 'Order In Route', 'Order Arrived'];
+                        $icons = ['✓', '✓', '✓', '✓', '✓'];
+                        
+                        // Determine the current status index
+                        $currentStatus = $order_detail['order']['order_status'];
+                        $currentIndex = 0;
+                        
+                        if ($currentStatus == 'pending') $currentIndex = 0;
+                        else if ($currentStatus == 'approved') $currentIndex = 1;
+                        else if ($currentStatus == 'shipped') $currentIndex = 2;
+                        else if ($currentStatus == 'delivered') $currentIndex = 4;
+                        
+                        // Calculate progress percentage
+                        $progressWidth = ($currentIndex / (count($statuses) - 1)) * 100;
+                    ?>
+
                     <div class="order-status-bar">
-                        <div class="status-item <?= ($order_detail['order']['order_status'] == 'pending') ? 'active' : '' ?>">Order Placed</div>
-                        <div class="status-item <?= ($order_detail['order']['order_status'] == 'approved') ? 'active' : '' ?>">Approved</div>
-                        <div class="status-item <?= ($order_detail['order']['order_status'] == 'shipped') ? 'active' : '' ?>">Shipped</div>
-                        <div class="status-item <?= ($order_detail['order']['order_status'] == 'delivered') ? 'active' : '' ?>">Delivered</div>
-                        <div class="status-item <?= ($order_detail['order']['order_status'] == 'declined') ? 'active' : '' ?>">Declined</div>
-                        <div class="status-item <?= ($order_detail['order']['order_status'] == 'cancelled') ? 'active' : '' ?>">Cancelled</div>
-                        <div class="status-item <?= ($order_detail['order']['order_status'] == 'completed') ? 'active' : '' ?>">Completed</div>
+                        <div class="status-line"></div>
+                        <div class="status-line-progress" style="width: <?= $progressWidth ?>%;"></div>
+                        
+                        <?php for($i = 0; $i < count($statuses); $i++): ?>
+                            <div class="status-item">
+                                <div class="status-circle <?= ($i <= $currentIndex) ? 'active' : '' ?>">
+                                    <?php if ($i <= $currentIndex): ?>
+                                        <span class="status-icon"><?= $icons[$i] ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="status-text <?= ($i <= $currentIndex) ? 'active' : '' ?>">
+                                    <?= $statusLabels[$i] ?>
+                                </div>
+                            </div>
+                        <?php endfor; ?>
                     </div>
 
                     <div class="order-details">
-                        <p><strong>Status:</strong> <span class="order-status-text"><?= ucfirst(htmlspecialchars($order_detail['order']['order_status'])) ?></span></p>
                         <?php if (!empty($order_detail['items'])): ?>
                             <p><strong>Items:</strong></p>
                             <?php foreach ($order_detail['items'] as $item): ?>

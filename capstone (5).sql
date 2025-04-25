@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 25, 2025 at 01:13 PM
+-- Generation Time: Apr 25, 2025 at 07:49 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,7 +41,8 @@ CREATE TABLE `add_ons` (
 
 INSERT INTO `add_ons` (`id`, `product_id`, `name`, `image_path`, `price`) VALUES
 (3, NULL, 'Chocolate Bar', 'uploads/Screenshot (2).png', 75.00),
-(4, NULL, 'teddy bear', 'uploads/Screenshot (8).png', 450.00);
+(4, NULL, 'teddy bear', 'uploads/Screenshot (8).png', 450.00),
+(5, NULL, 'hatdog', NULL, 30.00);
 
 -- --------------------------------------------------------
 
@@ -117,7 +118,9 @@ CREATE TABLE `cart` (
 
 INSERT INTO `cart` (`cart_id`, `user_id`, `product_id`, `product_name`, `product_price`, `product_image`, `quantity`, `added_at`, `is_customized`, `ribbon_color_id`, `ribbon_color_name`, `ribbon_color_price`, `wrapper_color_id`, `wrapper_color_name`, `wrapper_color_price`, `customer_message`, `addons`) VALUES
 (24, 12, 10, 'SUNFLOWER', 1234.00, 'roses.jpg', 1, '2025-04-25 03:31:32', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(25, 12, 7, 'hatdog', 23928.00, '6804dbf5b160d_6804c38e81713_flores.gif', 1, '2025-04-25 03:32:08', 1, 1, 'Red', 2.00, 1, 'pink', 10.00, 'hhatdog ito?', '[{\"id\":\"4\",\"name\":\"teddy bear\",\"price\":\"450.00\"}]');
+(30, 9, 24, 'Funeral flowers', 1234.00, '6804d5c0055b1_sun.jpg', 1, '2025-04-25 11:35:02', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(32, 9, 10, 'hatdog', 54.00, '6805b62b1c736.jpg', 2, '2025-04-25 13:38:39', 1, 1, 'Red', 2.00, 1, 'pink', 10.00, 'checkbox test3', '[{\"id\":\"5\",\"name\":\"hatdog\",\"price\":\"30.00\"}]'),
+(34, 13, 28, 'Roses', 500.00, 'productChart.png', 1, '2025-04-25 17:19:23', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -236,7 +239,10 @@ INSERT INTO `orders` (`order_id`, `customer_name`, `customer_address`, `customer
 (19, 'user1', 'lcc', 'user1@gmail.com', '09124537386', 'hahahha', NULL, 'cod', 'pending', '2025-04-25 10:56:59', 0, 1, 1234.00, '', NULL, NULL, NULL),
 (20, 'user1', 'lcc', 'user1@gmail.com', '09124537386', 'okiiiiiiiiiiiiiiiiiiiiiii', NULL, 'cod', 'pending', '2025-04-25 11:01:28', 0, 1, 23567.50, '', NULL, NULL, NULL),
 (21, 'user1', 'lcc', 'user1@gmail.com', '09124537386', 'okiiiiiiiiiiiiiiiiiiiiiii', NULL, 'cod', 'pending', '2025-04-25 11:03:34', 0, 1, 23567.50, '', NULL, NULL, NULL),
-(22, 'user1', 'lcc', 'user1@gmail.com', '09124537386', 'hatdogieeeeeeeeeeeeeee', 'uploads/1745579141_Screenshot (11).png', 'gcash', 'pending', '2025-04-25 11:05:41', 0, 1, 23553.00, '', NULL, NULL, NULL);
+(22, 'user1', 'lcc', 'user1@gmail.com', '09124537386', 'hatdogieeeeeeeeeeeeeee', 'uploads/1745579141_Screenshot (11).png', 'gcash', 'pending', '2025-04-25 11:05:41', 0, 1, 23553.00, '', NULL, NULL, NULL),
+(23, 'user1', 'lcccccccccccccccccccccccccccccccccccc', 'user1@gmail.com', '09124537386', 'checkout naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', NULL, 'cod', 'pending', '2025-04-25 13:01:02', 0, 1, 248.00, '', NULL, NULL, NULL),
+(24, 'user3', 'sumag', 'grixia400@gmail.com', '09615438465', 'checkbox test 2', 'uploads/1745586167_Screenshot 2025-03-05 184803.png', 'gcash', 'delivered', '2025-04-25 13:02:47', 0, 1, 23928.00, '', NULL, '2025-04-26', 'ninjavan'),
+(25, 'grover boy', 'Hacienda Remedios Barangay Balabag La Carlota City Negros Occidental Philippines', 'columnaariel460@gmail.com', '09123456782', 'tani ma send ka update', NULL, 'cod', 'delivered', '2025-04-25 17:20:23', 0, 1, 1999998.00, '', NULL, '2025-05-01', 'sa may 1 lang noy');
 
 -- --------------------------------------------------------
 
@@ -279,7 +285,10 @@ INSERT INTO `order_items` (`order_item_id`, `order_id`, `product_id`, `product_n
 (19, 18, 28, 'Roses', 500.00, 10),
 (20, 19, 10, 'SUNFLOWER', 1234.00, 1),
 (22, 21, 29, 'hatdog', 23567.50, 1),
-(23, 22, 30, 'hatdog', 23553.00, 1);
+(23, 22, 30, 'hatdog', 23553.00, 1),
+(24, 23, 17, 'wwwww', 124.00, 2),
+(25, 24, 31, 'hatdog', 23928.00, 1),
+(26, 25, 32, 'rosepharmachyyyyyyyyy', 1999998.00, 1);
 
 -- --------------------------------------------------------
 
@@ -312,7 +321,9 @@ INSERT INTO `password_resets` (`id`, `email`, `token`, `created_at`, `expires_at
 (9, 'user1@gmail.com', '731076', '2025-04-25 18:42:48', '2025-04-25 13:42:48', 0),
 (10, 'user1@gmail.com', '987259', '2025-04-25 18:44:13', '2025-04-25 13:44:13', 0),
 (11, 'user1@gmail.com', '880970', '2025-04-25 18:47:05', '2025-04-25 13:47:05', 0),
-(12, 'user1@gmail.com', '410885', '2025-04-25 18:50:35', '2025-04-25 13:50:35', 0);
+(12, 'user1@gmail.com', '410885', '2025-04-25 18:50:35', '2025-04-25 13:50:35', 0),
+(13, 'annanicoleermeo22@gmail.com', '554382', '2025-04-26 00:48:21', '2025-04-25 19:48:21', 0),
+(14, 'user1@gmail.com', '720310', '2025-04-26 01:00:14', '2025-04-25 20:00:14', 0);
 
 -- --------------------------------------------------------
 
@@ -352,7 +363,9 @@ INSERT INTO `products` (`product_id`, `product_name`, `price`, `product_price`, 
 (24, 'Funeral flowers', 0.00, 1234.00, 'wwwwwwwwwww', '6804d5c0055b1_sun.jpg', '2025-04-20 11:08:48', 'small, medium', 'lavender,red,blue', 10, NULL, 15, 5, 0),
 (28, 'Roses', 0.00, 500.00, 'pula2 gid nisa', 'productChart.png', '2025-04-23 06:10:13', NULL, NULL, NULL, NULL, 20, 10, 0),
 (29, 'hatdog', 23567.50, 23567.50, 'Customized product', 'default.jpg', '2025-04-25 11:03:34', NULL, NULL, NULL, NULL, 0, 0, 0),
-(30, 'hatdog', 23553.00, 23553.00, 'Customized product', 'default.jpg', '2025-04-25 11:05:41', NULL, NULL, NULL, NULL, 0, 0, 0);
+(30, 'hatdog', 23553.00, 23553.00, 'Customized product', 'default.jpg', '2025-04-25 11:05:41', NULL, NULL, NULL, NULL, 0, 0, 0),
+(31, 'hatdog', 23928.00, 23928.00, 'Customized product', 'default.jpg', '2025-04-25 13:02:47', NULL, NULL, NULL, NULL, 0, 0, 0),
+(32, 'rosepharmachyyyyyyyyy', 0.00, 1999998.00, 'De dónde viene?\r\nAl contrario del pensamiento popular, el texto de Lorem Ipsum no es simplemente texto aleatorio. Tiene sus raices en una pieza cl´sica de la literatura del Latin, que data del año 45 antes de Cristo, haciendo que este adquiera mas de 2000 años de antiguedad. Richard McClintock, un profesor de Latin de la Universidad de Hampden-Sydney en Virginia, encontró una de las palabras más oscuras de la lengua del latín, \"consecteur\", en un pasaje de Lorem Ipsum, y al seguir leyendo distintos textos del latín, descubrió la fuente indudable. Lorem Ipsum viene de las secciones 1.10.32 y 1.10.33 de \"de Finnibus Bonorum et Malorum\" (Los Extremos del Bien y El Mal) por Cicero, escrito en el año 45 antes de Cristo. Este libro es un tratado de teoría de éticas, muy popular durante el Renacimiento. La primera linea del Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", viene de una linea en la sección 1.10.32\r\n\r\nEl trozo de texto estándar de Lorem Ipsum usado desde el año 1500 es reproducido debajo para aquellos interesados. Las secciones 1.10.32 y 1.10.33 de \"de Finibus Bonorum et Malorum\" por Cicero son también reproducidas en su forma original exacta, acompañadas por versiones en Inglés de la traducción realizada en 1914 por H. Rackham.', 'Screenshot (2).png', '2025-04-25 16:18:22', NULL, NULL, 7, NULL, 65, 65, 0);
 
 -- --------------------------------------------------------
 
@@ -373,7 +386,8 @@ CREATE TABLE `ribbon_colors` (
 INSERT INTO `ribbon_colors` (`id`, `name`, `price`) VALUES
 (1, 'Red', 2.00),
 (2, 'White', 1.50),
-(3, 'Lavender', 2.50);
+(3, 'Lavender', 2.50),
+(4, 'black', 20.00);
 
 -- --------------------------------------------------------
 
@@ -403,7 +417,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `name`, `address`, `phone`, `
 (7, 'diza11111111', '$2y$10$Wa1y0FFWG8JBmYR1rA6Miuiia3MR2j73cXr9JqmSGFNdvh2YnSqWy', 'diza toralde', 'bago city', '+63678905545', NULL, 'uploads/profile_images/sun.jpg'),
 (9, 'user1', '$2y$10$T/r3nO31D84TPaQJf4WCGu0IVvHuKE15TpOOYilVGe5Snni6cSIYu', '', '', '', 'user1@gmail.com', 'uploads/default_profile.png'),
 (11, '', '$2y$10$1piQkbvDwhmXskyDNyntgeytumILZuv69FaL8bn2nlBFiaYXwE.rC', '', '', '', NULL, 'uploads/default_profile.png'),
-(12, 'user3', '$2y$10$QABsIWmG.nkhL54BSGYy/eJ8j4pv0OmrBeZEwyli/cK86bfxSzrj2', '', '', '', 'user3@gmail.com', 'uploads/default_profile.png');
+(12, 'user3', '$2y$10$QABsIWmG.nkhL54BSGYy/eJ8j4pv0OmrBeZEwyli/cK86bfxSzrj2', '', '', '', 'grixia400@gmail.com', 'uploads/default_profile.png'),
+(13, 'Grover', '$2y$10$kre6ThcRYS7mYdOeaaOGUO6FtQdqM71Rp.zfoQ5Qdv9jPNk7QOAni', 'Grover Boy', 'Hacienda Remedios Barangay Balabag La Carlota City Negros Occidental Philippines', '09876543451', 'columnaariel460@gmail.com', 'uploads/profile_images/Screenshot (7).png');
 
 -- --------------------------------------------------------
 
@@ -423,7 +438,8 @@ CREATE TABLE `wrappers` (
 
 INSERT INTO `wrappers` (`id`, `color`, `price`) VALUES
 (1, 'pink', 10.00),
-(2, 'black', 100.00);
+(2, 'black', 100.00),
+(3, 'red', 10.00);
 
 --
 -- Indexes for dumped tables
@@ -523,7 +539,7 @@ ALTER TABLE `wrappers`
 -- AUTO_INCREMENT for table `add_ons`
 --
 ALTER TABLE `add_ons`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `admins`
@@ -541,7 +557,7 @@ ALTER TABLE `bouquet_sizes`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -559,43 +575,43 @@ ALTER TABLE `customized_products`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `order_item_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `password_resets`
 --
 ALTER TABLE `password_resets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `ribbon_colors`
 --
 ALTER TABLE `ribbon_colors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `wrappers`
 --
 ALTER TABLE `wrappers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables

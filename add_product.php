@@ -7,6 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $product_price = $_POST['product_price'];
     $product_description = mysqli_real_escape_string($conn, $_POST['product_description']);
     $original_stock = (int)$_POST['original_stock'];
+    $category_id = !empty($_POST['category_id']) ? $_POST['category_id'] : NULL;
 
     // Handle image upload
     $image = $_FILES['product_image']['name'];
@@ -16,8 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($image)) {
         move_uploaded_file($image_tmp, $upload_dir . $image);
 
-        $sql = "INSERT INTO products (product_name, product_price, product_description, product_image, original_stock, stock_count) 
-                VALUES ('$product_name', '$product_price', '$product_description', '$image', '$original_stock', '$original_stock')";
+        $sql = "INSERT INTO products (product_name, product_price, product_description, product_image, original_stock, stock_count, category_id) 
+                VALUES ('$product_name', '$product_price', '$product_description', '$image', '$original_stock', '$original_stock', " . ($category_id ? "'$category_id'" : "NULL") . ")";
 
         if (mysqli_query($conn, $sql)) {
             header("Location: product.php");
@@ -143,6 +144,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <label for="product_price">Price (₱)</label>
         <input type="number" step="0.01" name="product_price" required>
+
+        <div class="form-group">
+                <label for="category_id">Category:</label>
+                <select id="category_id" name="category_id">
+                    <option value="">Select Category (Optional)</option>
+                    <?php
+                    $categories_result = mysqli_query($conn, "SELECT id, name FROM categories");
+                    while ($cat = mysqli_fetch_assoc($categories_result)):
+                    ?>
+                    <option value="<?php echo $cat['id']; ?>"><?php echo $cat['name']; ?></option>
+                    <?php endwhile; ?>
+                </select>
+        </div>
 
         <label for="original_stock">Original Stock</label>
         <input type="number" name="original_stock" min="0" required>
