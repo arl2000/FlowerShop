@@ -105,16 +105,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #d15e97;
             text-decoration: none;
         }
+
+        .customize-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #d15e97;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .customize-btn:hover {
+            background-color: #c04b84;
+        }
+
+        .customize-btn i {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
-<div style="position: absolute; top: 20px; right: 20px;">
-    <button type="button" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; background-color: #d15e97; color: white; border: none; cursor: pointer;" onclick="window.location.href='add_bouquet.php'">✨ Customize a Bouquet ✨</button>
-</div>
+
 
 <div class="form-container">
     <h2><i class="fas fa-plus"></i> Add New Product</h2>
     <form method="POST" enctype="multipart/form-data">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="add_bouquet.php" class="customize-btn">
+                <i class="fas fa-magic"></i> Customize a Bouquet
+            </a>
+        </div>
         <label for="product_name">Product Name</label>
         <input type="text" name="product_name" required>
 

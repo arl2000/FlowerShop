@@ -107,7 +107,7 @@ https://templatemo.com/tm-535-softy-pinko
                                     <input type="password" name="password" required placeholder="Password"/>
                                 </div>
                                 <div class="form-group">
-                                    <label class="label-agree-term"><a href="index.html"><em>Forgot Password?</em></a></label>
+                                    <label class="label-agree-term"><a href="forgot_password.php"><em>Forgot Password?</em></a></label>
                                 </div>
                                 <div class="form-group form-button">
                                     <input type="submit" name="signin" id="signin" class="form-submit" value="Log in"/>

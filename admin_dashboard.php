@@ -96,6 +96,7 @@ $top_address = $top_address_query->fetch_assoc();
 <head>
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -129,6 +130,32 @@ $top_address = $top_address_query->fetch_assoc();
             font-size: 1.8rem;
             font-weight: 600;
             margin: 0;
+        }
+
+        .inventory-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            background: var(--purple-gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
+        }
+
+        .inventory-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+        }
+
+        .inventory-btn i {
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
         }
 
         .boxes {
@@ -259,7 +286,7 @@ $top_address = $top_address_query->fetch_assoc();
         <h1>Dashboard Overview</h1>
     </div>
 
-    <a href="inventory.php" class="inventory-link">
+    <a href="inventory.php" class="inventory-btn">
         <i class="fas fa-boxes"></i> VIEW INVENTORY
     </a>
 

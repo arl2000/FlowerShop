@@ -61,229 +61,382 @@ $stmt->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Your Blooming Cart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Shopping Cart - Heavenly Bloom</title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/font-awesome.css">
+    <link rel="stylesheet" href="assets/css/templatemo-softy-pinko.css">
+    <link rel="stylesheet" href="home.css">
+    
     <style>
-  body {
-        font-family: 'Crimson Text', serif;
-        background-color: #f8f0e3;
-        margin: 0;
-        display: flex;
-        flex-direction: column; /* Stack items vertically in the body */
-        justify-content: flex-start; /* Align items to the top initially */
-        align-items: center; /* Center items horizontally in the body */
-        min-height: 100vh;
-    }
-    .cart-container {
-        max-width: 900px;
-        background: #fff;
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 8px 20px rgba(179, 93, 118, 0.15);
-        margin-top: 20px; /* Adjust this value if needed for spacing below the navigation */
-    }
-
-    .cart-container h2 {
-        text-align: center;
-        color: #b86987;
-        margin-bottom: 30px;
-        font-size: 2.2em;
-        font-weight: bold;
-    }
-
-    .cart-message {
-        color: #4CAF50;
-        text-align: center;
-        margin-bottom: 20px;
-        font-style: italic;
-    }
-
-    .cart-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 30px;
-        border-spacing: 0;
-    }
-
-    .cart-table th {
-        background-color: #f3dfe6;
-        color: #777;
-        padding: 15px;
-        text-align: left;
-        border-bottom: 2px solid #e8c4d0;
-        font-weight: normal;
-    }
-
-    .cart-table td {
-        padding: 15px;
-        border-bottom: 1px solid #f3dfe6;
-        text-align: center;
-    }
-
-    .cart-table td:first-child {
-        text-align: left;
-    }
-
-    .cart-table img {
-        height: 70px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-
-    .cart-table input[type="number"] {
-        width: 70px;
-        text-align: center;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        appearance: none;
-    }
-
-    .cart-table input[type="number"]::-webkit-outer-spin-button,
-    .cart-table input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    .cart-table button {
-        background-color: #e98fa9;
-        color: white;
-        padding: 10px 18px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        font-size: 0.9em;
-    }
-
-    .cart-table button:hover {
-        background-color: #d15f7e;
-    }
-
-    .cart-actions {
-        text-align: right;
-        padding-top: 30px;
-    }
-
-    .cart-actions strong {
-        font-size: 1.4em;
-        color: #b86987;
-        margin-right: 20px;
-    }
-
-    .cart-actions button {
-        font-size: 1.1em;
-        padding: 12px 24px;
-        margin-left: 15px;
-        border-radius: 10px;
-    }
-
-    .cart-actions a button {
-        background-color: #a78bfa;
-    }
-
-    .cart-actions a button:hover {
-        background-color: #8661d1;
-    }
-
-    .empty-cart {
-        text-align: center;
-        padding: 30px;
-        color: #999;
-        font-style: italic;
-        font-size: 1.1em;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .cart-table th, .cart-table td {
+        body {
+            font-family: 'Raleway', sans-serif;
+            background-color: #fff;
+            color: #636e72;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .cart-section {
+            padding: 50px 0;
+            background-color: #fff;
+        }
+        
+        .cart-container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .section-heading {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .section-heading h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .section-heading p {
+            color: #777;
+            font-size: 16px;
+        }
+        
+        .cart-message {
+            background-color: #feeef4;
+            color: #ff4483;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .cart-table {
+            width: 100%;
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .cart-table thead {
+            background-color: #fdf6f8;
+        }
+        
+        .cart-table th {
+            padding: 16px;
+            text-align: left;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 1px solid #f0ece7;
+        }
+        
+        .cart-table td {
+            padding: 20px 16px;
+            border-bottom: 1px solid #f0ece7;
+            vertical-align: middle;
+        }
+        
+        .cart-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .product-image img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-name {
+            font-weight: 500;
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .product-price, .product-subtotal {
+            font-weight: 600;
+            color: #ff4483;
+        }
+        
+        .quantity-input {
+            display: flex;
+            align-items: center;
+            max-width: 100px;
+        }
+        
+        .quantity-input input {
+            width: 50px;
+            height: 36px;
+            border: 1px solid #f0ece7;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+            padding: 0 5px;
+        }
+        
+        .quantity-input input:focus {
+            outline: none;
+            border-color: #ff4483;
+        }
+        
+        .remove-btn {
+            background-color: transparent;
+            color: #ff4483;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .remove-btn:hover {
+            color: #e91e63;
+            transform: scale(1.1);
+        }
+        
+        .cart-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 20px 0;
+        }
+        
+        .cart-total {
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .cart-total span {
+            color: #ff4483;
+            font-size: 24px;
+            margin-left: 10px;
+        }
+        
+        .cart-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .update-cart-btn, .checkout-btn {
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .update-cart-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .update-cart-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .checkout-btn {
+            background-color: #ff4483;
+            color: white;
+        }
+        
+        .checkout-btn:hover {
+            background-color: #e91e63;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 68, 131, 0.3);
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-cart-icon {
+            font-size: 60px;
+            color: #ffd1dc;
+            margin-bottom: 20px;
+        }
+        
+        .empty-cart-message {
+            font-size: 18px;
+            color: #777;
+            margin-bottom: 30px;
+        }
+        
+        .continue-shopping-btn {
+            display: inline-block;
+            background-color: #ff4483;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        
+        .continue-shopping-btn:hover {
+            background-color: #e91e63;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 68, 131, 0.3);
+        }
+        
+        .customization-details {
+            margin-top: 10px;
             padding: 10px;
-            font-size: 0.9em;
+            background-color: #f9f9f9;
+            border-radius: 5px;
         }
-
-        .cart-table img {
-            height: 60px;
+        
+        .customization-details h4 {
+            color: #ff4483;
+            margin-bottom: 10px;
         }
-
-        .cart-actions strong {
-            font-size: 1.2em;
+        
+        .customization-details p {
+            margin: 5px 0;
+            color: #666;
         }
-
-        .cart-actions button {
-            font-size: 1em;
-            padding: 10px 20px;
+        
+        .addons-list {
+            list-style: none;
+            padding-left: 0;
         }
-    }
-
-    .customization-details {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f9f9f9;
-        border-radius: 5px;
-    }
-    
-    .customization-details h4 {
-        color: #ff4483;
-        margin-bottom: 10px;
-    }
-    
-    .customization-details p {
-        margin: 5px 0;
-        color: #666;
-    }
-    
-    .addons-list {
-        list-style: none;
-        padding-left: 0;
-    }
-    
-    .addons-list li {
-        margin-bottom: 5px;
-        padding: 5px;
-        background-color: #fff;
-        border-radius: 3px;
-    }
-</style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    </head>
+        
+        .addons-list li {
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: #fff;
+            border-radius: 3px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .cart-table thead {
+                display: none;
+            }
+            
+            .cart-table, .cart-table tbody, .cart-table tr, .cart-table td {
+                display: block;
+                width: 100%;
+            }
+            
+            .cart-table tr {
+                margin-bottom: 20px;
+                border: 1px solid #f0ece7;
+                border-radius: 8px;
+                padding: 15px;
+            }
+            
+            .cart-table td {
+                text-align: right;
+                padding: 10px 0;
+                border-bottom: 1px solid #f0ece7;
+                position: relative;
+                padding-left: 50%;
+            }
+            
+            .cart-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 45%;
+                white-space: nowrap;
+                font-weight: 600;
+                text-align: left;
+            }
+            
+            .cart-table td:last-child {
+                border-bottom: 0;
+            }
+            
+            .product-image img {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .cart-actions {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .cart-total {
+                text-align: center;
+                width: 100%;
+            }
+            
+            .cart-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
 <body>
-<?php include 'navi.php'; ?>
-
-    <div class="cart-container">
-        <h2>Your Blooming Cart</h2>
-        <?php if (isset($_SESSION['cart_message'])): ?>
-            <p class="cart-message"><?= $_SESSION['cart_message'] ?></p>
-            <?php unset($_SESSION['cart_message']); ?>
-        <?php endif; ?>
-
-        <form method="POST" action="cart.php">
-            <table class="cart-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Image</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Subtotal</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($cartItems)): ?>
-                        <tr>
-                            <td colspan="6" class="empty-cart">
-                                Your cart is currently empty. Perhaps some beautiful blooms are calling your name?
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($cartItems as $item): ?>
+    <?php include 'navi.php'; ?>
+    
+    <section class="cart-section">
+        <div class="cart-container">
+            <div class="section-heading">
+                <h2>Your Shopping Cart</h2>
+                <p>Review your items and proceed to checkout</p>
+            </div>
+            
+            <?php if (isset($_SESSION['cart_message'])): ?>
+                <div class="cart-message">
+                    <?= $_SESSION['cart_message'] ?>
+                    <?php unset($_SESSION['cart_message']); ?>
+                </div>
+            <?php endif; ?>
+            
+            <form method="POST" action="cart.php">
+                <?php if (empty($cartItems)): ?>
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <p class="empty-cart-message">Your cart is currently empty. Perhaps some beautiful blooms are calling your name?</p>
+                        <a href="homepage.php" class="continue-shopping-btn">Continue Shopping</a>
+                    </div>
+                <?php else: ?>
+                    <table class="cart-table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <div class="product-info">
-                                        <img src="uploads/<?= htmlspecialchars($item['product_image']) ?>" alt="<?= htmlspecialchars($item['product_name']) ?>">
-                                        <div>
-                                            <h3><?= htmlspecialchars($item['product_name']) ?></h3>
+                                <th>Product</th>
+                                <th>Image</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($cartItems as $item): ?>
+                                <tr>
+                                    <td data-label="Product">
+                                        <div class="product-info">
+                                            <div class="product-name"><?= htmlspecialchars($item['product_name']) ?></div>
                                             <?php if ($item['is_customized']): ?>
                                                 <div class="customization-details">
                                                     <h4>Customization Details</h4>
@@ -317,42 +470,71 @@ $stmt->close();
                                                 </div>
                                             <?php endif; ?>
                                         </div>
-                                    </div>
-                                </td>
-                                <td>₱<?= number_format($item['product_price'], 2) ?></td>
-                                <td>
-                                    <input type="number" name="quantities[<?= $item['product_id'] ?>]" value="<?= $item['quantity'] ?>" min="1">
-                                </td>
-                                <td>₱<?= number_format($item['subtotal'], 2) ?></td>
-                                <td>
-                                    <button type="button" onclick="removeItem(<?= $item['product_id'] ?>)">Remove</button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-
-            <?php if (!empty($cartItems)): ?>
-                <div class="cart-actions">
-                    <strong>Total: ₱<?= number_format($total, 2) ?></strong>
-                    <button type="submit" name="update_cart">Update Cart</button>
-                    <a href="checkout.php"><button type="button">Proceed to Checkout</button></a>
-                </div>
-            <?php endif; ?>
-        </form>
-    </div>
-
-    <form id="removeForm" method="POST" action="cart.php" style="display:none;">
-        <input type="hidden" name="remove_product_id" id="remove_product_id">
+                                    </td>
+                                    <td data-label="Image" class="product-image">
+                                        <img src="uploads/<?= htmlspecialchars($item['product_image']) ?>" alt="<?= htmlspecialchars($item['product_name']) ?>">
+                                    </td>
+                                    <td data-label="Price" class="product-price">₱<?= number_format($item['product_price'], 2) ?></td>
+                                    <td data-label="Quantity" class="product-quantity">
+                                        <div class="quantity-input">
+                                            <input type="number" name="quantities[<?= $item['product_id'] ?>]" value="<?= $item['quantity'] ?>" min="1">
+                                        </div>
+                                    </td>
+                                    <td data-label="Subtotal" class="product-subtotal">₱<?= number_format($item['subtotal'], 2) ?></td>
+                                    <td data-label="Action">
+                                        <button type="button" class="remove-btn" onclick="removeItem(<?= $item['product_id'] ?>)">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    
+                    <div class="cart-actions">
+                        <div class="cart-total">
+                            Total: <span>₱<?= number_format($total, 2) ?></span>
+                        </div>
+                        <div class="cart-buttons">
+                            <button type="submit" name="update_cart" class="update-cart-btn">Update Cart</button>
+                            <a href="checkout.php">
+                                <button type="button" class="checkout-btn">Proceed to Checkout</button>
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Hidden form for product removal -->
+    <form id="remove-form" action="cart.php" method="POST" style="display: none;">
+        <input type="hidden" id="remove_product_id" name="remove_product_id" value="">
     </form>
+    
+    <!-- jQuery -->
+    <script src="assets/js/jquery-2.1.0.min.js"></script>
 
+    <!-- Bootstrap -->
+    <script src="assets/js/popper.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+
+    <!-- Plugins -->
+    <script src="assets/js/scrollreveal.min.js"></script>
+    <script src="assets/js/waypoints.min.js"></script>
+    <script src="assets/js/jquery.counterup.min.js"></script>
+    <script src="assets/js/imgfix.min.js"></script> 
+    
+    <!-- Global Init -->
+    <script src="assets/js/custom.js"></script>
+    
     <script>
         function removeItem(productId) {
-            document.getElementById('remove_product_id').value = productId;
-            document.getElementById('removeForm').submit();
+            if (confirm("Are you sure you want to remove this item from your cart?")) {
+                document.getElementById('remove_product_id').value = productId;
+                document.getElementById('remove-form').submit();
+            }
         }
     </script>
-
 </body>
 </html>
