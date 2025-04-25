@@ -10,8 +10,29 @@ if (!$userId) {
 }
 
 // Fetch cart items from the database
-$stmt = $conn->prepare("SELECT product_id, product_name, product_image, product_price, quantity FROM cart WHERE user_id = ?");
-$stmt->bind_param("i", $userId);
+$selectedItems = isset($_POST['selected_items']) ? $_POST['selected_items'] : [];
+
+if (empty($selectedItems)) {
+    $_SESSION['checkout_message'] = "Please select at least one item to checkout.";
+    header("Location: cart.php");
+    exit();
+}
+
+// Convert selected items to integers for safety
+$selectedItems = array_map('intval', $selectedItems);
+
+// Create placeholders for the IN clause
+$placeholders = str_repeat('?,', count($selectedItems) - 1) . '?';
+$types = str_repeat('i', count($selectedItems));
+
+// Fetch only the selected items from the cart
+$stmt = $conn->prepare("SELECT product_id, product_name, product_image, product_price, quantity, is_customized, 
+    ribbon_color_id, ribbon_color_name, ribbon_color_price, 
+    wrapper_color_id, wrapper_color_name, wrapper_color_price, 
+    customer_message, addons
+    FROM cart WHERE user_id = ? AND product_id IN ($placeholders)");
+$params = array_merge([$userId], $selectedItems);
+$stmt->bind_param("i" . $types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -24,8 +45,11 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
+// Store selected items in session for process_checkout.php
+$_SESSION['selected_items'] = $selectedItems;
+
 // Handle checkout
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $name = $_POST['customer_name'];
     $address = $_POST['customer_address'];
     $email = $_POST['customer_email'];
@@ -61,11 +85,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 
-    // Clear cart
-    $stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ?");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $stmt->close();
+    // Clear only the selected items from cart
+    $placeholders = str_repeat('?,', count($selectedItems) - 1) . '?';
+    $types = str_repeat('i', count($selectedItems));
+    $clear_cart = $conn->prepare("DELETE FROM cart WHERE user_id = ? AND product_id IN ($placeholders)");
+    $params = array_merge([$userId], $selectedItems);
+    $clear_cart->bind_param("i" . $types, ...$params);
+    $clear_cart->execute();
+    $clear_cart->close();
 
     $_SESSION['checkout_message'] = "Thank you for your order! Your order has been placed successfully.";
     header("Location: orders.php");

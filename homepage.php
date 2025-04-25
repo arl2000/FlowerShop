@@ -1035,13 +1035,26 @@ while ($row = $query->fetch_assoc());
     $categoryQuery = "SELECT * FROM categories";
     $categoryResult = $conn->query($categoryQuery);
     
-    // Count the total number of items in the cart
-    $cartCount = 0;
-    if (isset($_SESSION['cart'])) {
-        foreach ($_SESSION['cart'] as $item) {
-            $cartCount += $item['quantity']; // Count the quantity of each product
-        }
+    // Fetch cart items from database (without using aliases)
+    $stmt = $conn->prepare("SELECT product_id, product_name, product_image, product_price, quantity, is_customized, 
+    ribbon_color_id, ribbon_color_name, ribbon_color_price, 
+    wrapper_color_id, wrapper_color_name, wrapper_color_price, 
+    customer_message, addons
+    FROM cart
+    WHERE user_id = ?
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $cartItems = [];
+    $total = 0;
+    while ($row = $result->fetch_assoc()) {
+    $row['subtotal'] = $row['product_price'] * $row['quantity'];
+    $total += $row['subtotal'];
+    $cartItems[] = $row;
     }
+    $stmt->close();
     ?>
     
     <nav>

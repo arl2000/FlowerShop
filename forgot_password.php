@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->Port = 587;
                 
                 // Recipients
-                $mail->setFrom('your-email@gmail.com', 'Your Store Name');
+                $mail->setFrom('heavenlybloom@gmail.com', 'Heavenly Bloom');
                 $mail->addAddress($email);
                 
                 // Content

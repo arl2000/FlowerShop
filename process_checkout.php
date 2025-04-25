@@ -20,9 +20,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $userId = $_SESSION['user_id'];
 
-    // Fetch cart items from the database
-    $stmt = $conn->prepare("SELECT product_id, product_name, product_price, quantity, is_customized FROM cart WHERE user_id = ?");
-    $stmt->bind_param("i", $userId);
+    // Get selected items from session
+    $selectedItems = isset($_SESSION['selected_items']) ? $_SESSION['selected_items'] : [];
+    
+    if (empty($selectedItems)) {
+        echo "Error: No items selected for checkout.";
+        exit;
+    }
+
+    // Convert selected items to integers for safety
+    $selectedItems = array_map('intval', $selectedItems);
+
+    // Create placeholders for the IN clause
+    $placeholders = str_repeat('?,', count($selectedItems) - 1) . '?';
+    $types = str_repeat('i', count($selectedItems));
+
+    // Fetch only the selected items from the cart
+    $stmt = $conn->prepare("SELECT product_id, product_name, product_price, quantity, is_customized FROM cart WHERE user_id = ? AND product_id IN ($placeholders)");
+    $params = array_merge([$userId], $selectedItems);
+    $stmt->bind_param("i" . $types, ...$params);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -36,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
 
     if (empty($cartItems)) {
-        echo "Error: Your cart is empty during order processing.";
+        echo "Error: No items found for checkout.";
         exit;
     }
 
@@ -87,9 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $stmt_items->close();
 
-        // Clear the user's cart after checkout
-        $clear_cart = $conn->prepare("DELETE FROM cart WHERE user_id = ?");
-        $clear_cart->bind_param("i", $userId);
+        // Clear only the selected items from cart
+        $placeholders = str_repeat('?,', count($selectedItems) - 1) . '?';
+        $types = str_repeat('i', count($selectedItems));
+        $clear_cart = $conn->prepare("DELETE FROM cart WHERE user_id = ? AND product_id IN ($placeholders)");
+        $params = array_merge([$userId], $selectedItems);
+        $clear_cart->bind_param("i" . $types, ...$params);
         $clear_cart->execute();
         $clear_cart->close();
 

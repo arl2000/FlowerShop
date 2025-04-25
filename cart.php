@@ -410,7 +410,7 @@ $stmt->close();
                 </div>
             <?php endif; ?>
             
-            <form method="POST" action="cart.php">
+            <form method="POST" action="cart.php" id="cart-form">
                 <?php if (empty($cartItems)): ?>
                     <div class="empty-cart">
                         <div class="empty-cart-icon">
@@ -423,6 +423,7 @@ $stmt->close();
                     <table class="cart-table">
                         <thead>
                             <tr>
+                                <th>Select</th>
                                 <th>Product</th>
                                 <th>Image</th>
                                 <th>Price</th>
@@ -434,6 +435,9 @@ $stmt->close();
                         <tbody>
                             <?php foreach ($cartItems as $item): ?>
                                 <tr>
+                                    <td data-label="Select">
+                                        <input type="checkbox" name="selected_items[]" value="<?= $item['product_id'] ?>" checked>
+                                    </td>
                                     <td data-label="Product">
                                         <div class="product-info">
                                             <div class="product-name"><?= htmlspecialchars($item['product_name']) ?></div>
@@ -493,13 +497,11 @@ $stmt->close();
                     
                     <div class="cart-actions">
                         <div class="cart-total">
-                            Total: <span>₱<?= number_format($total, 2) ?></span>
+                            Total: <span>₱<span id="selected-total"><?= number_format($total, 2) ?></span></span>
                         </div>
                         <div class="cart-buttons">
                             <button type="submit" name="update_cart" class="update-cart-btn">Update Cart</button>
-                            <a href="checkout.php">
-                                <button type="button" class="checkout-btn">Proceed to Checkout</button>
-                            </a>
+                            <button type="button" class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -535,6 +537,55 @@ $stmt->close();
                 document.getElementById('remove-form').submit();
             }
         }
+
+        // Function to update total based on selected items
+        function updateSelectedTotal() {
+            let total = 0;
+            document.querySelectorAll('input[name="selected_items[]"]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    const row = checkbox.closest('tr');
+                    const subtotal = parseFloat(row.querySelector('.product-subtotal').textContent.replace('₱', '').replace(',', ''));
+                    total += subtotal;
+                }
+            });
+            document.getElementById('selected-total').textContent = total.toFixed(2);
+        }
+
+        // Function to handle checkout
+        function proceedToCheckout() {
+            const selectedItems = Array.from(document.querySelectorAll('input[name="selected_items[]"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            if (selectedItems.length === 0) {
+                alert('Please select at least one item to checkout');
+                return;
+            }
+
+            // Create a new form for checkout
+            const checkoutForm = document.createElement('form');
+            checkoutForm.method = 'POST';
+            checkoutForm.action = 'checkout.php';
+            
+            // Add selected items to the form
+            selectedItems.forEach(itemId => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selected_items[]';
+                input.value = itemId;
+                checkoutForm.appendChild(input);
+            });
+            
+            // Add the form to the document and submit it
+            document.body.appendChild(checkoutForm);
+            checkoutForm.submit();
+        }
+
+        // Add event listeners for checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[name="selected_items[]"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedTotal);
+            });
+        });
     </script>
 </body>
 </html>
