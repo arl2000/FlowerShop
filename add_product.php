@@ -109,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
 <div style="position: absolute; top: 20px; right: 20px;">
-    <button type="button" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; background-color: #d15e97; color: white; border: none; cursor: pointer;" onclick="window.location.href='add_bouquet.php'">✨ Customized ✨</button>
+    <button type="button" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; background-color: #d15e97; color: white; border: none; cursor: pointer;" onclick="window.location.href='add_bouquet.php'">✨ Customize a Bouquet ✨</button>
 </div>
 
 <div class="form-container">

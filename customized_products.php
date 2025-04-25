@@ -165,6 +165,45 @@ if ($addOnQuery && $addOnQuery->num_rows > 0) {
 $wrappersJson = json_encode($wrappers);
 $ribbonColorsJson = json_encode($ribbonColors);
 $addOnsJson = json_encode($addOns);
+
+// Function to soft delete a customized product
+function softDeleteCustomizedProduct($productId) {
+    global $conn;
+    
+    // Update the is_deleted flag to 1 instead of actually deleting the record
+    $query = "UPDATE customized_products SET is_deleted = 1 WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "i", $productId);
+    mysqli_stmt_execute($stmt);
+    
+    if (mysqli_stmt_affected_rows($stmt) > 0) {
+        return true;
+    }
+    return false;
+}
+
+// Fetch customized products that are not deleted
+$customized_result = mysqli_query($conn, "
+    SELECT cp.*, cp.stock_count, cat.name AS category_name,
+           bs.name AS bouquet_size_name, bs.price AS bouquet_size_price,
+           rc.name AS ribbon_color_name, rc.price AS ribbon_color_price
+    FROM customized_products cp
+    LEFT JOIN categories cat ON cp.category_id = cat.id
+    LEFT JOIN bouquet_sizes bs ON cp.bouquet_sizes = bs.id
+    LEFT JOIN ribbon_colors rc ON cp.ribbon_colors = rc.id
+    WHERE cp.is_deleted = 0
+") or die("Query Error (Customized): " . mysqli_error($conn));
+
+// Check if a delete request is made
+if (isset($_GET['delete_id'])) {
+    $productId = $_GET['delete_id'];
+    // Call the soft delete function
+    softDeleteCustomizedProduct($productId);
+
+    // Redirect back to the customized products page after deletion
+    header("Location: customized_products.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

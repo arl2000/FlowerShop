@@ -59,6 +59,12 @@ if (isset($_GET['delete'])) {
     header("Location: admin_customizations.php");
     exit();
 }
+
+if (isset($_GET['delete_customized'])) {
+    $productId = (int)$_GET['id'];
+    include 'delete_customized_product.php';
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -75,6 +81,17 @@ if (isset($_GET['delete'])) {
         th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
         a { margin: 0 5px; color: #007BFF; text-decoration: none; }
         a:hover { text-decoration: underline; }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -91,7 +108,7 @@ if (isset($_GET['delete'])) {
 <table>
     <tr><th>Name</th><th>Price</th><th>Actions</th></tr>
     <?php
-    $result = mysqli_query($conn, "SELECT * FROM addons");
+    $result = mysqli_query($conn, "SELECT * FROM add_ons");
     while ($row = mysqli_fetch_assoc($result)) {
         echo "<tr>
             <td>{$row['name']}</td>
@@ -149,15 +166,15 @@ if (isset($_GET['delete'])) {
 <table>
     <tr><th>Color</th><th>Price</th><th>Actions</th></tr>
     <?php
-    $result = mysqli_query($conn, "SELECT * FROM ribbons");
+    $result = mysqli_query($conn, "SELECT * FROM ribbon_colors");
     while ($row = mysqli_fetch_assoc($result)) {
         echo "<tr>
-            <td>{$row['color']}</td>
+            <td>{$row['name']}</td>
             <td>₱{$row['price']}</td>
             <td>
                 <form method='POST' style='display:inline-block;'>
                     <input type='hidden' name='edit_id' value='{$row['id']}'>
-                    <input type='text' name='ribbon_color' value='{$row['color']}' required>
+                    <input type='text' name='ribbon_color' value='{$row['name']}' required>
                     <input type='number' step='0.01' name='ribbon_price' value='{$row['price']}' required>
                     <button name='submit_ribbon' type='submit'>Update</button>
                 </form>
@@ -167,6 +184,32 @@ if (isset($_GET['delete'])) {
     }
     ?>
 </table>
+
+<!-- CUSTOMIZED PRODUCTS -->
+<h2>Customized Products</h2>
+<table>
+    <tr><th>Product Name</th><th>Price</th><th>Actions</th></tr>
+    <?php
+    $result = mysqli_query($conn, "SELECT * FROM customized_products WHERE is_deleted = 0");
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "<tr>
+            <td>{$row['product_name']}</td>
+            <td>₱{$row['product_price']}</td>
+            <td>
+                <button class='delete-btn' onclick='deleteCustomizedProduct({$row['id']})'>Delete</button>
+            </td>
+        </tr>";
+    }
+    ?>
+</table>
+
+<script>
+function deleteCustomizedProduct(productId) {
+    if (confirm('Are you sure you want to delete this product?')) {
+        window.location.href = `admin_customizations.php?delete_customized=1&id=${productId}`;
+    }
+}
+</script>
 
 </body>
 </html>

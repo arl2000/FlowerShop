@@ -2,6 +2,17 @@
 session_start();
 include 'db_connection.php';
 
+// Check if a delete request is made for customized products
+if (isset($_GET['delete_id'])) {
+    $productId = $_GET['delete_id'];
+    // Call the soft delete function
+    softDeleteCustomizedProduct($productId);
+
+    // Redirect back to the homepage after deletion
+    header("Location: homepage.php");
+    exit;
+}
+
 // Initialize cart count from database if user is logged in
 $cartCount = 0;
 if (isset($_SESSION['user_id'])) {
@@ -809,6 +820,7 @@ while ($row = $query->fetch_assoc());
             color: #ff4483;
             font-weight: 500;
         }
+        
         
         .form-check-label {
             color: #636e72;

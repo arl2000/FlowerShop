@@ -259,6 +259,10 @@ $top_address = $top_address_query->fetch_assoc();
         <h1>Dashboard Overview</h1>
     </div>
 
+    <a href="inventory.php" class="inventory-link">
+        <i class="fas fa-boxes"></i> VIEW INVENTORY
+    </a>
+
     <!-- Main Stats -->
     <div class="boxes">
         <div class="box">
