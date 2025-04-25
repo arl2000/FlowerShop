@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 25, 2025 at 07:49 PM
+-- Generation Time: Apr 25, 2025 at 07:55 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -241,8 +241,8 @@ INSERT INTO `orders` (`order_id`, `customer_name`, `customer_address`, `customer
 (21, 'user1', 'lcc', 'user1@gmail.com', '09124537386', 'okiiiiiiiiiiiiiiiiiiiiiii', NULL, 'cod', 'pending', '2025-04-25 11:03:34', 0, 1, 23567.50, '', NULL, NULL, NULL),
 (22, 'user1', 'lcc', 'user1@gmail.com', '09124537386', 'hatdogieeeeeeeeeeeeeee', 'uploads/1745579141_Screenshot (11).png', 'gcash', 'pending', '2025-04-25 11:05:41', 0, 1, 23553.00, '', NULL, NULL, NULL),
 (23, 'user1', 'lcccccccccccccccccccccccccccccccccccc', 'user1@gmail.com', '09124537386', 'checkout naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', NULL, 'cod', 'pending', '2025-04-25 13:01:02', 0, 1, 248.00, '', NULL, NULL, NULL),
-(24, 'user3', 'sumag', 'grixia400@gmail.com', '09615438465', 'checkbox test 2', 'uploads/1745586167_Screenshot 2025-03-05 184803.png', 'gcash', 'delivered', '2025-04-25 13:02:47', 0, 1, 23928.00, '', NULL, '2025-04-26', 'ninjavan'),
-(25, 'grover boy', 'Hacienda Remedios Barangay Balabag La Carlota City Negros Occidental Philippines', 'columnaariel460@gmail.com', '09123456782', 'tani ma send ka update', NULL, 'cod', 'delivered', '2025-04-25 17:20:23', 0, 1, 1999998.00, '', NULL, '2025-05-01', 'sa may 1 lang noy');
+(24, 'user3', 'sumag', 'user3@gmail.com', '09615438465', 'checkbox test 2', 'uploads/1745586167_Screenshot 2025-03-05 184803.png', 'gcash', 'delivered', '2025-04-25 13:02:47', 0, 1, 23928.00, '', NULL, '2025-04-26', 'ninjavan'),
+(25, 'grover boy', 'Hacienda Remedios Barangay Balabag La Carlota City Negros Occidental Philippines', 'grover@gmail.com', '09123456782', 'tani ma send ka update', NULL, 'cod', 'delivered', '2025-04-25 17:20:23', 0, 1, 1999998.00, '', NULL, '2025-05-01', 'sa may 1 lang noy');
 
 -- --------------------------------------------------------
 
@@ -417,8 +417,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `name`, `address`, `phone`, `
 (7, 'diza11111111', '$2y$10$Wa1y0FFWG8JBmYR1rA6Miuiia3MR2j73cXr9JqmSGFNdvh2YnSqWy', 'diza toralde', 'bago city', '+63678905545', NULL, 'uploads/profile_images/sun.jpg'),
 (9, 'user1', '$2y$10$T/r3nO31D84TPaQJf4WCGu0IVvHuKE15TpOOYilVGe5Snni6cSIYu', '', '', '', 'user1@gmail.com', 'uploads/default_profile.png'),
 (11, '', '$2y$10$1piQkbvDwhmXskyDNyntgeytumILZuv69FaL8bn2nlBFiaYXwE.rC', '', '', '', NULL, 'uploads/default_profile.png'),
-(12, 'user3', '$2y$10$QABsIWmG.nkhL54BSGYy/eJ8j4pv0OmrBeZEwyli/cK86bfxSzrj2', '', '', '', 'grixia400@gmail.com', 'uploads/default_profile.png'),
-(13, 'Grover', '$2y$10$kre6ThcRYS7mYdOeaaOGUO6FtQdqM71Rp.zfoQ5Qdv9jPNk7QOAni', 'Grover Boy', 'Hacienda Remedios Barangay Balabag La Carlota City Negros Occidental Philippines', '09876543451', 'columnaariel460@gmail.com', 'uploads/profile_images/Screenshot (7).png');
+(12, 'user3', '$2y$10$QABsIWmG.nkhL54BSGYy/eJ8j4pv0OmrBeZEwyli/cK86bfxSzrj2', '', '', '', 'user3@gmail.com', 'uploads/default_profile.png'),
+(13, 'Grover', '$2y$10$kre6ThcRYS7mYdOeaaOGUO6FtQdqM71Rp.zfoQ5Qdv9jPNk7QOAni', 'Grover Boy', 'Hacienda Remedios Barangay Balabag La Carlota City Negros Occidental Philippines', '09876543451', 'grover@gmail.com', 'uploads/profile_images/Screenshot (7).png');
 
 -- --------------------------------------------------------
 

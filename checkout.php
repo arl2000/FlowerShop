@@ -45,6 +45,19 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
+// Fetch user data to pre-fill checkout form
+function getUserData($conn, $userId) {
+    $stmt = $conn->prepare("SELECT name, email, phone, address FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $userData = $result->fetch_assoc();
+    $stmt->close();
+    return $userData;
+}
+
+$userData = getUserData($conn, $userId);
+
 // Store selected items in session for process_checkout.php
 $_SESSION['selected_items'] = $selectedItems;
 
@@ -178,16 +191,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
     <form action="process_checkout.php" method="POST" enctype="multipart/form-data">
         <label>Full Name:</label>
-        <input type="text" name="customer_name" required>
+        <input type="text" name="customer_name" value="<?= htmlspecialchars($userData['name'] ?? '') ?>" required>
 
         <label>Address:</label>
-        <textarea name="customer_address" required></textarea>
+        <textarea name="customer_address" required><?= htmlspecialchars($userData['address'] ?? '') ?></textarea>
 
         <label>Email:</label>
-        <input type="email" name="customer_email" required>
+        <input type="email" name="customer_email" value="<?= htmlspecialchars($userData['email'] ?? '') ?>" required>
 
         <label>Phone Number:</label>
-        <input type="text" name="customer_phone" required>
+        <input type="text" name="customer_phone" value="<?= htmlspecialchars($userData['phone'] ?? '') ?>" required>
 
         <label>Order Message (optional):</label>
         <textarea name="order_message"></textarea>
