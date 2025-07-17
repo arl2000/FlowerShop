@@ -37,9 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_cart']) && iss
 
 // Fetch cart items from database (without using aliases)
 $stmt = $conn->prepare("SELECT product_id, product_name, product_image, product_price, quantity, is_customized, 
-    ribbon_color_id, ribbon_color_name, ribbon_color_price, 
-    wrapper_color_id, wrapper_color_name, wrapper_color_price, 
-    customer_message, addons
+    customer_message, ribbon_color_name, wrapper_color_name, leaves, addons, flowers
     FROM cart
     WHERE user_id = ?
 ");
@@ -55,8 +53,131 @@ while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
 }
 $stmt->close();
-?>
 
+// Helper: fetch item info from DB by group and id
+function fetchItemInfo($conn, $group, $id) {
+    $id = (int)$id;
+    switch ($group) {
+        case 'flowers':
+        case 'flower':
+            $sql = "SELECT name, price FROM flowers WHERE id = $id LIMIT 1";
+            break;
+        case 'addons':
+        case 'add_ons':
+        case 'addon':
+            $sql = "SELECT name, price FROM add_ons WHERE id = $id LIMIT 1";
+            break;
+        case 'ribbons':
+        case 'ribbon':
+            $sql = "SELECT name, price FROM ribbon_colors WHERE id = $id LIMIT 1";
+            break;
+        case 'wrappers':
+        case 'wrapper':
+            $sql = "SELECT color AS name, price FROM wrappers WHERE id = $id LIMIT 1";
+            break;
+        case 'leaves':
+        case 'leaf':
+            $sql = "SELECT name, price FROM leaves WHERE id = $id LIMIT 1";
+            break;
+        default:
+            return ['name' => 'Unknown', 'price' => 0];
+    }
+    $res = $conn->query($sql);
+    if ($res && $row = $res->fetch_assoc()) {
+        return ['name' => $row['name'], 'price' => $row['price']];
+    }
+    return ['name' => 'Unknown', 'price' => 0];
+}
+
+// Enhanced display function: fill missing names/prices from DB
+function displaySelectedItems($custom) {
+    global $conn;
+    $groups = [
+        'ribbons'  => 'Ribbons',
+        'wrappers' => 'Wrappers',
+        'leaves'   => 'Leaves',
+        'addons'   => 'Add-ons',
+        'flowers'  => 'Flowers'
+    ];
+    foreach ($groups as $key => $label) {
+        if (!empty($custom[$key])) {
+            echo "<p>{$label}:</p><ul class='addons-list'>";
+            foreach ($custom[$key] as $item) {
+                // Skip if 'id' is not set (prevents warning)
+                if (!isset($item['id'])) {
+                    $name = 'Unknown';
+                    $price = 0;
+                    $qty = isset($item['qty']) ? (int)$item['qty'] : 1;
+                    $price_fmt = number_format($price, 2);
+                    echo "<li>{$name} x{$qty} (₱{$price_fmt} each)</li>";
+                    continue;
+                }
+                $name  = isset($item['name']) && $item['name'] ? htmlspecialchars($item['name']) : null;
+                $price = isset($item['price']) ? $item['price'] : null;
+                $qty   = isset($item['qty']) ? (int)$item['qty'] : 1;
+                // If name or price missing, fetch from DB
+                if (!$name || $price === null) {
+                    $info = fetchItemInfo($conn, $key, $item['id']);
+                    if (!$name)  $name  = htmlspecialchars($info['name']);
+                    if ($price === null) $price = $info['price'];
+                }
+                if (!$name) $name = 'Unknown';
+                if ($price === null) $price = 0;
+                $price_fmt = number_format($price, 2);
+                echo "<li>{$name} x{$qty} (₱{$price_fmt} each)</li>";
+            }
+            echo "</ul>";
+        }
+    }
+}
+
+// Fetch and return selected items as a formatted string for modal
+function getSelectedItemsSummary($custom) {
+    $summary = [];
+    $groups = [
+        'ribbons'  => 'Ribbon',
+        'wrappers' => 'Wrapper',
+        'leaves'   => 'Leaf',
+        'addons'   => 'Add-on',
+        'flowers'  => 'Flower'
+    ];
+    foreach ($groups as $key => $label) {
+        if (!empty($custom[$key])) {
+            foreach ($custom[$key] as $item) {
+                $name  = isset($item['name']) ? $item['name'] : "Unknown {$label}";
+                $qty   = isset($item['qty']) ? (int)$item['qty'] : 1;
+                $price = isset($item['price']) ? number_format($item['price'], 2) : "0.00";
+                $summary[] = "{$label}: {$name} x{$qty} (₱{$price} each)";
+            }
+        }
+    }
+    return implode(", ", $summary);
+}
+
+// Prepare base64-encoded cart data for JavaScript
+ob_start();
+$jsonData = json_encode(array_map(function($item) {
+    return [
+        'product_name' => $item['product_name'],
+        'product_image' => $item['product_image'],
+        'product_price' => $item['product_price'],
+        'quantity' => $item['quantity'],
+        'subtotal' => $item['subtotal'],
+        'is_customized' => $item['is_customized'],
+        'customer_message' => $item['customer_message'],
+        'ribbons'  => $item['ribbons'],
+        'wrappers' => $item['wrappers'],
+        'leaves'   => $item['leaves'],
+        'addons'   => $item['addons'],
+        'flowers'  => $item['flowers'],
+    ];
+}, $cartItems), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+if ($jsonData === false) {
+    $jsonData = '[]';
+}
+$base64Data = base64_encode($jsonData);
+ob_end_clean();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -395,7 +516,6 @@ $stmt->close();
 </head>
 <body>
     <?php include 'navi.php'; ?>
-    
     <section class="cart-section">
         <div class="cart-container">
             <div class="section-heading">
@@ -433,10 +553,10 @@ $stmt->close();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($cartItems as $item): ?>
-                                <tr>
+                            <?php foreach ($cartItems as $idx => $item): ?>
+                                <tr class="cart-item-row" data-idx="<?= $idx ?>" style="cursor:pointer;">
                                     <td data-label="Select">
-                                        <input type="checkbox" name="selected_items[]" value="<?= $item['product_id'] ?>" checked>
+                                        <input type="checkbox" name="selected_items[]" value="<?= $item['product_id'] ?>" checked onclick="event.stopPropagation();">
                                     </td>
                                     <td data-label="Product">
                                         <div class="product-info">
@@ -444,30 +564,28 @@ $stmt->close();
                                             <?php if ($item['is_customized']): ?>
                                                 <div class="customization-details">
                                                     <h4>Customization Details</h4>
-                                                    <?php if ($item['ribbon_color_name']): ?>
-                                                        <p>Ribbon Color: <?= htmlspecialchars($item['ribbon_color_name']) ?> 
-                                                            (₱<?= number_format($item['ribbon_color_price'], 2) ?>)</p>
-                                                    <?php endif; ?>
-                                                    
-                                                    <?php if ($item['wrapper_color_name']): ?>
-                                                        <p>Wrapper Color: <?= htmlspecialchars($item['wrapper_color_name']) ?> 
-                                                            (₱<?= number_format($item['wrapper_color_price'], 2) ?>)</p>
-                                                    <?php endif; ?>
-                                                    
-                                                    <?php if ($item['addons']): ?>
-                                                        <p>Add-ons:</p>
-                                                        <ul class="addons-list">
-                                                            <?php 
-                                                            $addons = json_decode($item['addons'], true);
-                                                            if ($addons) {
-                                                                foreach ($addons as $addon) {
-                                                                    echo '<li>' . htmlspecialchars($addon['name']) . ' (₱' . number_format($addon['price'], 2) . ')</li>';
-                                                                }
+                                                    <?php
+                                                    if ($item['is_customized']) {
+                                                        $custom = json_decode($item['addons'], true);
+                                                        // Add empty arrays for any missing groups
+                                                        $groups = ['flowers', 'ribbons', 'wrappers', 'addons', 'leaves'];
+                                                        foreach ($groups as $group) {
+                                                            if (!isset($custom[$group])) {
+                                                                $custom[$group] = [];
                                                             }
-                                                            ?>
-                                                        </ul>
-                                                    <?php endif; ?>
-                                                    
+                                                        }
+                                                        displaySelectedItems($custom);
+                                                    } else {
+                                                        $custom = [
+                                                            'ribbons'  => json_decode($item['ribbon_color_name'], true),
+                                                            'wrappers' => json_decode($item['wrapper_color_name'], true),
+                                                            'leaves'   => json_decode($item['leaves'], true),
+                                                            'addons'   => json_decode($item['addons'], true),
+                                                            'flowers'  => json_decode($item['flowers'], true),
+                                                        ];
+                                                        displaySelectedItems($custom);
+                                                    }
+                                                    ?>
                                                     <?php if ($item['customer_message']): ?>
                                                         <p>Message: <?= htmlspecialchars($item['customer_message']) ?></p>
                                                     <?php endif; ?>
@@ -481,12 +599,12 @@ $stmt->close();
                                     <td data-label="Price" class="product-price">₱<?= number_format($item['product_price'], 2) ?></td>
                                     <td data-label="Quantity" class="product-quantity">
                                         <div class="quantity-input">
-                                            <input type="number" name="quantities[<?= $item['product_id'] ?>]" value="<?= $item['quantity'] ?>" min="1">
+                                            <input type="number" name="quantities[<?= $item['product_id'] ?>]" value="<?= $item['quantity'] ?>" min="1" onclick="event.stopPropagation();">
                                         </div>
                                     </td>
                                     <td data-label="Subtotal" class="product-subtotal">₱<?= number_format($item['subtotal'], 2) ?></td>
                                     <td data-label="Action">
-                                        <button type="button" class="remove-btn" onclick="removeItem(<?= $item['product_id'] ?>)">
+                                        <button type="button" class="remove-btn" onclick="event.stopPropagation();removeItem(<?= $item['product_id'] ?>)">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </td>
@@ -501,7 +619,7 @@ $stmt->close();
                         </div>
                         <div class="cart-buttons">
                             <button type="submit" name="update_cart" class="update-cart-btn">Update Cart</button>
-                            <button type="button" class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+                            <button type="button" class="checkout-btn" id="proceed-to-checkout-btn">Proceed to Checkout</button>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -514,6 +632,17 @@ $stmt->close();
         <input type="hidden" id="remove_product_id" name="remove_product_id" value="">
     </form>
     
+    <!-- Hidden container for cart data -->
+    <div id="cart-data" style="display:none;"><?= $base64Data ?></div>
+    
+    <!-- Modal for cart item details -->
+    <div id="cartItemModal" style="display:none;position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;">
+        <div style="background:#fff;max-width:500px;width:90%;margin:auto;padding:2rem;position:relative;border-radius:10px;">
+            <button id="closeCartModal" style="position:absolute;top:10px;right:15px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+            <div id="cartModalContent"></div>
+        </div>
+    </div>
+
     <!-- jQuery -->
     <script src="assets/js/jquery-2.1.0.min.js"></script>
 
@@ -531,6 +660,33 @@ $stmt->close();
     <script src="assets/js/custom.js"></script>
     
     <script>
+        // Function to handle checkout
+        function proceedToCheckout() {
+            const selectedItems = Array.from(document.querySelectorAll('input[name="selected_items[]"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            if (selectedItems.length === 0) {
+                alert('Please select at least one item to checkout');
+                return;
+            }
+
+            // Reuse the existing cart form
+            const cartForm = document.getElementById('cart-form');
+            
+            // Change form action to checkout.php
+            cartForm.action = 'checkout.php';
+            
+            // Create a hidden input to indicate this is a checkout request
+            const checkoutInput = document.createElement('input');
+            checkoutInput.type = 'hidden';
+            checkoutInput.name = 'checkout';
+            checkoutInput.value = '1';
+            cartForm.appendChild(checkoutInput);
+            
+            // Submit the form
+            cartForm.submit();
+        }
+
         function removeItem(productId) {
             if (confirm("Are you sure you want to remove this item from your cart?")) {
                 document.getElementById('remove_product_id').value = productId;
@@ -551,40 +707,126 @@ $stmt->close();
             document.getElementById('selected-total').textContent = total.toFixed(2);
         }
 
-        // Function to handle checkout
-        function proceedToCheckout() {
-            const selectedItems = Array.from(document.querySelectorAll('input[name="selected_items[]"]:checked'))
-                .map(checkbox => checkbox.value);
-            
-            if (selectedItems.length === 0) {
-                alert('Please select at least one item to checkout');
-                return;
-            }
+        // Get cart data from hidden div
+        const base64String = document.getElementById('cart-data').textContent;
+        const jsonString = atob(base64String);
+        const cartItemsData = JSON.parse(jsonString);
 
-            // Create a new form for checkout
-            const checkoutForm = document.createElement('form');
-            checkoutForm.method = 'POST';
-            checkoutForm.action = 'checkout.php';
-            
-            // Add selected items to the form
-            selectedItems.forEach(itemId => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'selected_items[]';
-                input.value = itemId;
-                checkoutForm.appendChild(input);
+        // Modal logic
+        document.querySelectorAll('.cart-item-row').forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                // Prevent click on checkbox or remove button from opening modal
+                if (e.target.tagName === 'INPUT' || e.target.classList.contains('remove-btn') || e.target.closest('.remove-btn')) return;
+                const idx = parseInt(row.getAttribute('data-idx'));
+                showCartItemModal(idx);
             });
-            
-            // Add the form to the document and submit it
-            document.body.appendChild(checkoutForm);
-            checkoutForm.submit();
-        }
+        });
 
+        function showCartItemModal(idx) {
+            const item = cartItemsData[idx];
+            let html = `<h3 style="margin-top:0">${escapeHtml(item.product_name)}</h3>`;
+            if (item.is_customized) {
+                html += `<hr><h4>Customization Details</h4>`;
+                let names = [];
+                // Ribbons
+                let ribbons = [];
+                try { ribbons = JSON.parse(item.ribbons); } catch(e) {}
+                if (ribbons && ribbons.length) {
+                    html += `<div style="margin-top:8px;"><strong>Ribbons:</strong><ul>`;
+                    ribbons.forEach(function(ribbon) {
+                        let name = ribbon.name || 'Unknown Ribbon';
+                        if (!ribbon.name && ribbon.id) name += ' (ID: ' + ribbon.id + ')';
+                        names.push(name);
+                        html += `<li>${escapeHtml(name)} x${ribbon.qty || 1}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+                // Wrappers
+                let wrappers = [];
+                try { wrappers = JSON.parse(item.wrappers); } catch(e) {}
+                if (wrappers && wrappers.length) {
+                    html += `<div style="margin-top:8px;"><strong>Wrappers:</strong><ul>`;
+                    wrappers.forEach(function(wrapper) {
+                        let name = wrapper.name || 'Unknown Wrapper';
+                        if (!wrapper.name && wrapper.id) name += ' (ID: ' + wrapper.id + ')';
+                        names.push(name);
+                        html += `<li>${escapeHtml(name)} x${wrapper.qty || 1}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+                // Leaves
+                let leaves = [];
+                try { leaves = JSON.parse(item.leaves); } catch(e) {}
+                if (leaves && leaves.length) {
+                    html += `<div style="margin-top:8px;"><strong>Leaves:</strong><ul>`;
+                    leaves.forEach(function(leaf) {
+                        let name = leaf.name || 'Unknown Leaf';
+                        if (!leaf.name && leaf.id) name += ' (ID: ' + leaf.id + ')';
+                        names.push(name);
+                        html += `<li>${escapeHtml(name)} x${leaf.qty || 1}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+                // Add-ons
+                let addons = [];
+                try { addons = JSON.parse(item.addons); } catch(e) {}
+                if (addons && addons.length) {
+                    html += `<div style="margin-top:8px;"><strong>Add-ons:</strong><ul>`;
+                    addons.forEach(function(addon) {
+                        let name = addon.name || 'Unknown Add-on';
+                        if (!addon.name && addon.id) name += ' (ID: ' + addon.id + ')';
+                        names.push(name);
+                        html += `<li>${escapeHtml(name)} x${addon.qty || 1}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+                // Flowers
+                let flowers = [];
+                try { flowers = JSON.parse(item.flowers); } catch(e) {}
+                if (flowers && flowers.length) {
+                    html += `<div style="margin-top:8px;"><strong>Flowers:</strong><ul>`;
+                    flowers.forEach(function(flower) {
+                        let name = flower.name || 'Unknown Flower';
+                        if (!flower.name && flower.id) name += ' (ID: ' + flower.id + ')';
+                        names.push(name);
+                        html += `<li>${escapeHtml(name)} x${flower.qty || 1}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+                if (item.customer_message) {
+                    html += `<div style="margin-top:8px;"><strong>Message:</strong> ${escapeHtml(item.customer_message)}</div>`;
+                }
+                // Debug: show raw JSON if names are missing
+                if (!names.length) {
+                    html += `<pre style="margin-top:10px;background:#f8f8f8;padding:8px;border-radius:4px;">${escapeHtml(JSON.stringify(item, null, 2))}</pre>`;
+                }
+            }
+            document.getElementById('cartModalContent').innerHTML = html;
+            document.getElementById('cartItemModal').style.display = 'flex';
+        }
+        document.getElementById('closeCartModal').onclick = function() {
+            document.getElementById('cartItemModal').style.display = 'none';
+        };
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return ({
+                    '&':'&','<':'<','>':'>','"':'"',"'":'&#39;'
+                })[m];
+            });
+        }
+        document.getElementById('cartItemModal').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+        
         // Add event listeners for checkboxes
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('input[name="selected_items[]"]').forEach(checkbox => {
                 checkbox.addEventListener('change', updateSelectedTotal);
             });
+            
+            // Add event listener for checkout button
+            document.getElementById('proceed-to-checkout-btn').addEventListener('click', proceedToCheckout);
         });
     </script>
 </body>

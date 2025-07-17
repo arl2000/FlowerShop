@@ -137,6 +137,16 @@ if ($userId > 0) {
             font-size: 1rem;
         }
 
+        /* Highlight the customizer link */
+        nav .nav-links a.customizer-link {
+            color: #e91e63;
+            font-weight: 600;
+        }
+
+        nav .nav-links a.customizer-link:hover {
+            color: #c2185b;
+        }
+
         /* Occasions Dropdown */
         nav .dropdown {
             position: relative;
@@ -310,8 +320,8 @@ if ($userId > 0) {
                         <?php endwhile; ?>
                     </div>
                 </div>
-                <a href="#customized-products-section" class="customize-link">
-                    <i class="fas fa-palette"></i> Customize
+                <a href="bouquet_customizer.php" class="customizer-link">
+                    <i class="fas fa-magic"></i> Design Bouquet
                 </a>
                 <a href="cart.php" class="cart-link">
                     <i class="fas fa-shopping-cart"></i> Cart <span><?= $cartCount ?></span>

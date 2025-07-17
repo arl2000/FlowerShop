@@ -17,12 +17,16 @@ if (isset($_GET['delete_id'])) {
 $cartCount = 0;
 if (isset($_SESSION['user_id'])) {
     $userId = (int) $_SESSION['user_id'];
-    $cartCountQuery = $conn->prepare("SELECT SUM(quantity) as total FROM cart WHERE user_id = ?");
-    $cartCountQuery->bind_param("i", $userId);
-    $cartCountQuery->execute();
-    $cartCountResult = $cartCountQuery->get_result();
-    $cartCount = $cartCountResult->fetch_assoc()['total'] ?? 0;
-    $cartCountQuery->close();
+    // Check if cart table exists
+    $cartTableExists = $conn->query("SHOW TABLES LIKE 'cart'");
+    if ($cartTableExists && $cartTableExists->num_rows > 0) {
+        $cartCountQuery = $conn->prepare("SELECT SUM(quantity) as total FROM cart WHERE user_id = ?");
+        $cartCountQuery->bind_param("i", $userId);
+        $cartCountQuery->execute();
+        $cartCountResult = $cartCountQuery->get_result();
+        $cartCount = $cartCountResult->fetch_assoc()['total'] ?? 0;
+        $cartCountQuery->close();
+    }
 }
 
 // Fetch order count securely using prepared statements
@@ -1036,25 +1040,24 @@ while ($row = $query->fetch_assoc());
     $categoryResult = $conn->query($categoryQuery);
     
     // Fetch cart items from database (without using aliases)
-    $stmt = $conn->prepare("SELECT product_id, product_name, product_image, product_price, quantity, is_customized, 
-    ribbon_color_id, ribbon_color_name, ribbon_color_price, 
-    wrapper_color_id, wrapper_color_name, wrapper_color_price, 
-    customer_message, addons
+    $cartItems = [];
+    $total = 0;
+    if (isset($userId) && $cartTableExists && $cartTableExists->num_rows > 0) {
+        $stmt = $conn->prepare("SELECT product_id, product_name, product_image, product_price, quantity, is_customized
     FROM cart
     WHERE user_id = ?
     ");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    $cartItems = [];
-    $total = 0;
-    while ($row = $result->fetch_assoc()) {
-    $row['subtotal'] = $row['product_price'] * $row['quantity'];
-    $total += $row['subtotal'];
-    $cartItems[] = $row;
+        while ($row = $result->fetch_assoc()) {
+            $row['subtotal'] = $row['product_price'] * $row['quantity'];
+            $total += $row['subtotal'];
+            $cartItems[] = $row;
+        }
+        $stmt->close();
     }
-    $stmt->close();
     ?>
     
     <nav>

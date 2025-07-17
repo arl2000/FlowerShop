@@ -26,10 +26,8 @@ $placeholders = str_repeat('?,', count($selectedItems) - 1) . '?';
 $types = str_repeat('i', count($selectedItems));
 
 // Fetch only the selected items from the cart
-$stmt = $conn->prepare("SELECT product_id, product_name, product_image, product_price, quantity, is_customized, 
-    ribbon_color_id, ribbon_color_name, ribbon_color_price, 
-    wrapper_color_id, wrapper_color_name, wrapper_color_price, 
-    customer_message, addons
+// Remove non-existent columns from SELECT
+$stmt = $conn->prepare("SELECT product_id, product_name, product_image, product_price, quantity, is_customized, customer_message, addons, ribbon_color_name, wrapper_color_name, leaves, flowers
     FROM cart WHERE user_id = ? AND product_id IN ($placeholders)");
 $params = array_merge([$userId], $selectedItems);
 $stmt->bind_param("i" . $types, ...$params);
@@ -253,5 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         document.getElementById('gcashDetails').style.display = (value === 'gcash') ? 'block' : 'none';
     }
 </script>
+</body>
+</html>
 </body>
 </html>
